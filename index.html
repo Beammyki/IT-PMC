@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toolbox — PDF & File Utilities</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <!-- PDF-lib -->
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Grain overlay -->
+  <div class="grain"></div>
+
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-dot" id="cursor-dot"></div>
+
+  <video class="bg-video" autoplay muted loop playsinline>
+  <source src="video/wallpaper.mp4" type="video/mp4">
+</video>
+<div class="bg-overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-header">
+      <div class="logo-mark">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 2h8l4 4v10H3V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+          <path d="M11 2v4h4" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+          <path d="M3 14h12M3 16h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <span class="logo-title">Toolbox</span>
+        <span class="logo-sub">File Utilities</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">
+        <span class="nav-label">Navigate</span>
+        <a class="nav-item active" data-page="home" href="#home">
+          <span class="nav-icon">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 6.5L8 2l6 4.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z"/>
+            </svg>
+          </span>
+          <span class="nav-text">Overview</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <span class="nav-label">Tools</span>
+
+        <a class="nav-item" data-page="pdf" href="#pdf">
+          <span class="nav-icon">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 6V1.5h5l2 2V6M4 12H2.5A1.5 1.5 0 011 10.5v-3A1.5 1.5 0 012.5 6h11A1.5 1.5 0 0115 7.5v3A1.5 1.5 0 0113.5 12H12M4 9.5h8V15H4V9.5z"/>
+            </svg>
+          </span>
+          <span class="nav-text">PDF Batch Print</span>
+          <span class="nav-live">LIVE</span>
+        </a>
+
+        <a class="nav-item" data-page="merge" href="#merge">
+          <span class="nav-icon">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+              <path d="M3 4h10M3 8h7M3 12h4"/>
+            </svg>
+          </span>
+          <span class="nav-text">Merge PDF</span>
+          <span class="nav-live">LIVE</span>
+        </a>
+
+        <a class="nav-item" data-page="compress" href="#compress">
+          <span class="nav-icon">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2v12M5 5l3-3 3 3M5 11l3 3 3-3"/>
+            </svg>
+          </span>
+          <span class="nav-text">Compress PDF</span>
+          <span class="nav-live">LIVE</span>
+        </a>
+
+        <a class="nav-item" data-page="convert" href="#convert">
+          <span class="nav-icon">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 8h12M10 4l4 4-4 4"/>
+            </svg>
+          </span>
+          <span class="nav-text">Convert Files</span>
+          <span class="nav-live">LIVE</span>
+        </a>
+
+        <a class="nav-item" data-page="sign" href="#sign">
+          <span class="nav-icon">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12c2-4 4-8 5-8s0 4 2 4 2-4 3-4M2 14h12"/>
+            </svg>
+          </span>
+          <span class="nav-text">Sign PDF</span>
+          <span class="nav-live">LIVE</span>
+        </a>
+
+        <a class="nav-item" href="https://hr-certificate.pages.dev/" target="_blank">
+  <span class="nav-icon">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 1l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z"/>
+    </svg>
+  </span>
+  <span class="nav-text">Certificate</span>
+</a>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="version-info">
+        <span class="version-dot"></span>
+        <span class="version-text">v1.0.0 — Cloudflare Pages</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="breadcrumb">
+          <span class="breadcrumb-root">Toolbox</span>
+          <span class="breadcrumb-sep">—</span>
+          <span class="breadcrumb-current" id="breadcrumb-current">Overview</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-tagline">ทำงานบนเครื่องคุณ · ไม่มีการอัปโหลด</span>
+      </div>
+    </header>
+
+    <div class="page-container" id="page-container">
+      <!-- Pages render here -->
+    </div>
+  </main>
+
+  <!-- MODAL OVERLAY -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="modal-icon">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 6V1h8v5M4 12H2.5A1.5 1.5 0 011 10.5v-3A1.5 1.5 0 012.5 6h11A1.5 1.5 0 0115 7.5v3A1.5 1.5 0 0113.5 12H12M4 9.5h8V15H4z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="modal-title">ยืนยันการปริ้น</h2>
+          <p class="modal-subtitle" id="modal-subtitle">—</p>
+        </div>
+      </div>
+      <div class="modal-list" id="modal-list"></div>
+      <div class="modal-actions">
+        <button class="btn btn--ghost" id="modal-cancel">ยกเลิก</button>
+        <button class="btn btn--primary" id="modal-confirm">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 6V1h8v5M4 12H2.5A1.5 1.5 0 011 10.5v-3A1.5 1.5 0 012.5 6h11A1.5 1.5 0 0115 7.5v3A1.5 1.5 0 0113.5 12H12M4 9.5h8V15H4z"/>
+          </svg>
+          ปริ้นเลย
+        </button>
+      </div>
+    </div>
+  </div>
+
+<script src="js/pdf-print.js"></script>
+<script src="js/merge-pdf.js"></script>
+<script src="js/compress-pdf.js"></script>
+<script src="js/convert-files.js"></script>
+<script src="js/sign-pdf.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
