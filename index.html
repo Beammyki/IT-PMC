@@ -13,6 +13,8 @@
   <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
   <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
   <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+  
 
   <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -120,7 +122,52 @@
     </svg>
   </span>
   <span class="nav-text">Certificate</span>
+  <span class="nav-live">LIVE</span>
 </a>
+
+<!-- ต่อจาก Certificate -->
+<a class="nav-item" href="http://192.168.78.36:8501/" target="_blank">
+  <span class="nav-icon">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 4h12v8H2zM5 4V2h6v2M8 7v3M6 9h4"/>
+    </svg>
+  </span>
+  <span class="nav-text">ระบบเงินเดือน HR</span>
+  <span class="nav-live">LIVE</span>
+</a>
+
+<a class="nav-item" data-page="lock" href="#lock">
+  <span class="nav-icon">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="7" width="10" height="8" rx="1.5"/>
+      <path d="M5 7V5a3 3 0 016 0v2"/>
+    </svg>
+  </span>
+  <span class="nav-text">PDF Lock</span>
+  <span class="nav-live">LIVE</span>
+</a>
+
+<a class="nav-item" data-page="unlock" href="#unlock">
+  <span class="nav-icon">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="7" width="10" height="8" rx="1.5"/>
+      <path d="M5 7V5a3 3 0 016 0"/>
+    </svg>
+  </span>
+  <span class="nav-text">PDF Unlock</span>
+  <span class="nav-live">LIVE</span>
+</a>
+      <!-- ต่อจาก Sign PDF -->
+<a class="nav-item" data-page="watermark" href="#watermark">
+  <span class="nav-icon">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 3l10 10M3 13l10-10M8 1v2M8 13v2M1 8h2M13 8h2"/>
+    </svg>
+  </span>
+  <span class="nav-text">Remove Watermark</span>
+  <span class="nav-live">LIVE</span>
+</a>
+
       </div>
     </nav>
 
@@ -187,6 +234,9 @@
 <script src="js/compress-pdf.js"></script>
 <script src="js/convert-files.js"></script>
 <script src="js/sign-pdf.js"></script>
+<script src="js/remove-watermark.js"></script>
 <script src="js/app.js"></script>
+<script src="js/pdf-unlock.js"></script>
+<script src="js/pdf-lock.js"></script>
 </body>
 </html>

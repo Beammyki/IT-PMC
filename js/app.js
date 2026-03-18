@@ -43,6 +43,9 @@ const PAGES = {
   compress: { title: 'Compress PDF',    render: () => CompressPdf.renderPage() },
   convert:  { title: 'Convert Files',   render: () => ConvertFiles.renderPage() },
   sign:     { title: 'Sign PDF',        render: () => SignPdf.renderPage() },
+  watermark: { title: 'Remove Watermark', render: () => RemoveWatermark.renderPage() },
+  unlock: { title: 'PDF Unlock', render: () => PdfUnlock.renderPage() },
+  lock: { title: 'PDF Lock', render: () => PdfLock.renderPage() },
 };
 
 let currentPage = null;
@@ -122,7 +125,46 @@ function renderHome() {
       live: true,
       svg: 'M2 12c2-4 4-8 5-8s0 4 2 4 2-4 3-4M2 14h12'
     },
+    {
+  id: 'watermark',
+  num: '06',
+  title: 'Remove Watermark',
+  desc: 'ลบโลโก้และ watermark ออกจากรูปด้วยการวาดทับ',
+  icon: 'card-icon--rose',
+  live: true,
+  svg: 'M3 3l10 10M3 13l10-10M8 1v2M8 13v2M1 8h2M13 8h2'
+},
+    {
+  id: 'unlock',
+  num: '07',
+  title: 'PDF Unlock',
+  desc: 'ปลดล็อค PDF รหัสผ่านหลายไฟล์พร้อมกัน โหลด CSV นำเข้าได้เลย',
+  icon: 'card-icon--gold',
+  live: true,
+  svg: 'M3 7h10v8H3zM5 7V5a3 3 0 016 0'
+},
+  {
+  id: 'lock',
+  num: '08',
+  title: 'PDF Lock',
+  desc: 'ใส่รหัสผ่าน PDF หลายไฟล์พร้อมกัน ดาวน์โหลดเป็น ZIP',
+  icon: 'card-icon--gold',
+  live: true,
+  svg: 'M3 7h10v8H3zM5 7V5a3 3 0 016 0v2'
+},
+
+{
+  id: 'salary',
+  num: '09',
+  title: 'ระบบเงินเดือน HR',
+  desc: 'ระบบจัดการเงินเดือนพนักงาน เปิดบนเซิร์ฟเวอร์ภายใน',
+  icon: 'card-icon--teal',
+  live: true,
+  svg: 'M2 4h12v8H2zM5 4V2h6v2M8 7v3M6 9h4',
+  url: 'http://192.168.78.36:8501/'
+},
   ];
+
 
   const container = document.getElementById('page-container');
   container.innerHTML = `
@@ -136,7 +178,7 @@ function renderHome() {
       <div class="tool-grid">
         ${tools.map(t => `
           <div class="tool-card${!t.live ? ' tool-card--soon' : ''}"
-               ${t.live ? `onclick="navigate('${t.id}')"` : ''}>
+               ${t.live ? `onclick="${t.url ? `window.open('${t.url}','_blank')` : `navigate('${t.id}')`}"` : ''}>
             ${!t.live ? '<span class="card-soon-tag">เร็ว ๆ นี้</span>' : ''}
             <span class="card-number">${t.num}</span>
             <div class="card-icon ${t.icon}">
