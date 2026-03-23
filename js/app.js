@@ -92,6 +92,8 @@ function renderHome() {
       label: 'Admin',
       items: [
         { id:'excel', num:'12', title:'Excel Admin', desc:'ระบบจัดการข้อมูล Excel', icon:'card-icon--teal', svg:'M2 2h12v12H2zM2 6h12M2 10h12M6 2v12M10 2v12', url:'https://script.google.com/macros/s/AKfycbzM47RYLjJBJ0a7QLcT-InU2NOtC7eS_gBFJFabXdmrBWYfV3GZ7osqz1yrJiR8D0xC/exec' },
+        // หา section Admin แล้วเพิ่ม item นี้ต่อจาก Excel Admin
+        { id:'express', num:'13', title:'Express Admin', desc:'ระบบจัดการ Express backend', icon:'card-icon--rose', svg:'M2 3h12v10H2zM2 7h12M6 3v10M1 5l2-2M15 5l-2-2', url:'https://express-admin.naravichku.workers.dev/' },
       ]
     },
   ];
