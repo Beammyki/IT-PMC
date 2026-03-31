@@ -36,6 +36,7 @@ const PAGES = {
   lock:      { title: 'PDF Lock',           render: () => PdfLock.renderPage() },
   unlock:    { title: 'PDF Unlock',         render: () => PdfUnlock.renderPage() },
   watermark: { title: 'Remove Watermark',   render: () => RemoveWatermark.renderPage() },
+  schedprint: { title: 'Scheduled Print',   render: () => ScheduledPrint.renderPage() },
 };
 
 /* ═══════════════════════════════
@@ -73,6 +74,7 @@ function renderHome() {
         { id:'lock',      num:'06', title:'PDF Lock',           desc:'ใส่รหัสผ่าน PDF หลายไฟล์พร้อมกัน',     icon:'card-icon--gold', svg:'M3 7h10v8H3zM5 7V5a3 3 0 016 0v2' },
         { id:'unlock',    num:'07', title:'PDF Unlock',         desc:'ปลดล็อค PDF รหัสผ่านหลายไฟล์',         icon:'card-icon--gold', svg:'M3 7h10v8H3zM5 7V5a3 3 0 016 0' },
         { id:'watermark', num:'08', title:'Remove Watermark',  desc:'ลบโลโก้และ watermark ออกจากรูป',        icon:'card-icon--rose', svg:'M3 3l10 10M3 13l10-10M8 1v2M8 13v2M1 8h2M13 8h2' },
+        { id:'schedprint', num:'09', title:'Scheduled Print', desc:'ตั้งเวลาปริ้นอัตโนมัติ กำหนดรอบและช่วงเวลาได้', icon:'card-icon--blue', svg:'M8 2a6 6 0 100 12A6 6 0 008 2zM8 5v3.5l2.5 1.5' },
       ]
     },
     {
@@ -93,7 +95,7 @@ function renderHome() {
       items: [
         { id:'excel', num:'12', title:'Excel Admin', desc:'ระบบจัดการข้อมูล Excel', icon:'card-icon--teal', svg:'M2 2h12v12H2zM2 6h12M2 10h12M6 2v12M10 2v12', url:'https://script.google.com/macros/s/AKfycbzM47RYLjJBJ0a7QLcT-InU2NOtC7eS_gBFJFabXdmrBWYfV3GZ7osqz1yrJiR8D0xC/exec' },
         // หา section Admin แล้วเพิ่ม item นี้ต่อจาก Excel Admin
-        { id:'express', num:'13', title:'Express Admin', desc:'ระบบจัดการ Express backend', icon:'card-icon--rose', svg:'M2 3h12v10H2zM2 7h12M6 3v10M1 5l2-2M15 5l-2-2', url:'https://express-admin.naravichku.workers.dev/' },
+        { id:'express', num:'13', title:'Express Admin', desc:'ระบบจัดการ Express backend', icon:'card-icon--rose', svg:'M2 3h12v10H2zM2 7h12M6 3v10M1 5l2-2M15 5l-2-2', url:'https://4439ab01.pegasus-stock.pages.dev/' },
       ]
     },
   ];
