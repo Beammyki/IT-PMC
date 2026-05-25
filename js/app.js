@@ -37,6 +37,7 @@ const PAGES = {
   unlock:    { title: 'PDF Unlock',         render: () => PdfUnlock.renderPage() },
   watermark: { title: 'Remove Watermark',   render: () => RemoveWatermark.renderPage() },
   schedprint: { title: 'Scheduled Print',   render: () => ScheduledPrint.renderPage() },
+  word2pdf: { title: 'Word to PDF', render: () => WordToPdf.renderPage() },
 };
 
 /* ═══════════════════════════════
@@ -75,6 +76,7 @@ function renderHome() {
         { id:'unlock',    num:'07', title:'PDF Unlock',         desc:'ปลดล็อค PDF รหัสผ่านหลายไฟล์',         icon:'card-icon--gold', svg:'M3 7h10v8H3zM5 7V5a3 3 0 016 0' },
         { id:'watermark', num:'08', title:'Remove Watermark',  desc:'ลบโลโก้และ watermark ออกจากรูป',        icon:'card-icon--rose', svg:'M3 3l10 10M3 13l10-10M8 1v2M8 13v2M1 8h2M13 8h2' },
         { id:'schedprint', num:'09', title:'Scheduled Print', desc:'ตั้งเวลาปริ้นอัตโนมัติ กำหนดรอบและช่วงเวลาได้', icon:'card-icon--blue', svg:'M8 2a6 6 0 100 12A6 6 0 008 2zM8 5v3.5l2.5 1.5' },
+        { id:'word2pdf', num:'10', title:'Word to PDF', desc:'แปลง Word เป็น PDF ได้ formatting ตรงต้นฉบับ', icon:'card-icon--blue', svg:'M3 2h7l3 3v9H3zM10 2v3h3M6 7l2 5 2-5' },
       ]
     },
     {
