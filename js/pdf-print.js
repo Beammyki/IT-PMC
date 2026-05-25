@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────
-   pdf-print.js — PDF Batch Print Tool
+   pdf-print.js — PDF & Word Batch Print Tool
    ───────────────────────────────────────────── */
 
 const PdfPrint = (() => {
@@ -28,12 +28,23 @@ const PdfPrint = (() => {
     fill.style.width = pct + '%';
   }
 
+  function getExt(f) {
+    return f.name.split('.').pop().toLowerCase();
+  }
+
+  function isValidFile(f) {
+    const ext = getExt(f);
+    return f.type === 'application/pdf'
+      || ext === 'pdf'
+      || ext === 'doc'
+      || ext === 'docx';
+  }
+
   /* ── File Management ── */
   function addFiles(newFiles) {
     for (const f of newFiles) {
-      const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf');
       const isDupe = files.find(x => x.name === f.name && x.size === f.size);
-      if (isPdf && !isDupe) {
+      if (isValidFile(f) && !isDupe) {
         files.push(f);
         selected.add(files.length - 1);
       }
@@ -59,16 +70,16 @@ const PdfPrint = (() => {
     render();
   }
 
-  function selectAll()  { files.forEach((_, i) => selected.add(i)); render(); }
-  function deselectAll(){ selected.clear(); render(); }
-  function clearAll()   { files.length = 0; selected.clear(); render(); setStatus(''); }
+  function selectAll()   { files.forEach((_, i) => selected.add(i)); render(); }
+  function deselectAll() { selected.clear(); render(); }
+  function clearAll()    { files.length = 0; selected.clear(); render(); setStatus(''); }
 
   /* ── Render ── */
   function render() {
-    const section = document.getElementById('pdf-file-section');
-    const listEl  = document.getElementById('pdf-file-list');
-    const statEl  = document.getElementById('pdf-list-stat');
-    const summEl  = document.getElementById('pdf-selected-summary');
+    const section  = document.getElementById('pdf-file-section');
+    const listEl   = document.getElementById('pdf-file-list');
+    const statEl   = document.getElementById('pdf-list-stat');
+    const summEl   = document.getElementById('pdf-selected-summary');
     const printBtn = document.getElementById('pdf-print-btn');
 
     if (!section) return;
@@ -76,14 +87,10 @@ const PdfPrint = (() => {
     section.style.display = files.length ? '' : 'none';
 
     const s = selected.size;
-    if (statEl) {
-      statEl.innerHTML = `<strong>${files.length}</strong> ไฟล์ในคิว`;
-    }
-    if (summEl) {
-      summEl.innerHTML = s
-        ? `เลือกแล้ว <strong>${s}</strong> จาก ${files.length} ไฟล์`
-        : 'ยังไม่ได้เลือกไฟล์';
-    }
+    if (statEl) statEl.innerHTML = `<strong>${files.length}</strong> ไฟล์ในคิว`;
+    if (summEl) summEl.innerHTML = s
+      ? `เลือกแล้ว <strong>${s}</strong> จาก ${files.length} ไฟล์`
+      : 'ยังไม่ได้เลือกไฟล์';
     if (printBtn) printBtn.disabled = s === 0;
 
     if (!listEl) return;
@@ -91,7 +98,8 @@ const PdfPrint = (() => {
 
     files.forEach((f, i) => {
       const isSel = selected.has(i);
-      const item = document.createElement('div');
+      const ext   = getExt(f).toUpperCase();
+      const item  = document.createElement('div');
       item.className = 'file-item' + (isSel ? ' selected' : '');
       item.style.animationDelay = (i * 0.04) + 's';
       item.onclick = () => toggle(i);
@@ -102,7 +110,7 @@ const PdfPrint = (() => {
             <path d="M2 5l2.5 2.5L8 2.5" stroke="#0C0B09" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <span class="pdf-tag">PDF</span>
+        <span class="pdf-tag">${ext}</span>
         <span class="file-name" title="${f.name}">${f.name}</span>
         <span class="file-size">${formatBytes(f.size)}</span>
         <button class="file-remove" onclick="event.stopPropagation(); PdfPrint.removeFile(${i})" title="ลบออก">×</button>
@@ -113,73 +121,130 @@ const PdfPrint = (() => {
 
   /* ── Modal ── */
   function openConfirm() {
-    const sel = [...selected].map(i => files[i]);
+    const sel      = [...selected].map(i => files[i]);
     const subtitle = document.getElementById('modal-subtitle');
-    const list = document.getElementById('modal-list');
+    const list     = document.getElementById('modal-list');
 
     if (subtitle) {
-      subtitle.textContent = `จะรวม ${sel.length} ไฟล์เป็น PDF เดียว แล้วส่งไปยังเครื่องปริ้น`;
+      const pdfCount  = sel.filter(f => getExt(f) === 'pdf').length;
+      const wordCount = sel.filter(f => ['doc','docx'].includes(getExt(f))).length;
+      let desc = '';
+      if (pdfCount > 0 && wordCount > 0) desc = `PDF ${pdfCount} ไฟล์ + Word ${wordCount} ไฟล์`;
+      else if (pdfCount > 0) desc = `PDF ${pdfCount} ไฟล์ รวมเป็นไฟล์เดียวแล้วปริ้น`;
+      else desc = `Word ${wordCount} ไฟล์ แปลงแล้วปริ้น`;
+      subtitle.textContent = desc;
     }
+
     if (list) {
       list.innerHTML = sel.map(f => `
         <div class="modal-file-item">
-          <span class="pdf-tag">PDF</span>
+          <span class="pdf-tag">${getExt(f).toUpperCase()}</span>
           <span>${f.name}</span>
         </div>
       `).join('');
     }
+
     document.getElementById('modal-overlay').classList.add('open');
   }
 
   /* ── Print Logic ── */
   async function executePrint() {
-    const sel = [...selected].map(i => files[i]);
+    const sel      = [...selected].map(i => files[i]);
     const printBtn = document.getElementById('pdf-print-btn');
     if (printBtn) printBtn.disabled = true;
 
-    setProgress(0);
-    setStatus('กำลังโหลดและรวมไฟล์...');
+    const pdfFiles  = sel.filter(f => getExt(f) === 'pdf');
+    const wordFiles = sel.filter(f => ['doc','docx'].includes(getExt(f)));
 
-    try {
-      const merged = await PDFLib.PDFDocument.create();
+    // ── ปริ้น PDF ──────────────────────────────────
+    if (pdfFiles.length > 0) {
+      setProgress(0);
+      setStatus('กำลังโหลดและรวมไฟล์ PDF...');
+      try {
+        const merged = await PDFLib.PDFDocument.create();
 
-      for (let i = 0; i < sel.length; i++) {
-        setStatus(`กำลังประมวลผล: ${sel[i].name}`);
-        const buffer = await sel[i].arrayBuffer();
-        const pdf = await PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
-        const pages = await merged.copyPages(pdf, pdf.getPageIndices());
-        pages.forEach(p => merged.addPage(p));
-        setProgress(Math.round(((i + 1) / sel.length) * 80));
+        for (let i = 0; i < pdfFiles.length; i++) {
+          setStatus(`กำลังประมวลผล: ${pdfFiles[i].name}`);
+          const buffer = await pdfFiles[i].arrayBuffer();
+          const pdf    = await PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+          const pages  = await merged.copyPages(pdf, pdf.getPageIndices());
+          pages.forEach(p => merged.addPage(p));
+          setProgress(Math.round(((i + 1) / pdfFiles.length) * 75));
+        }
+
+        setStatus('กำลังสร้างไฟล์...');
+        setProgress(90);
+
+        const bytes = await merged.save();
+        const blob  = new Blob([bytes], { type: 'application/pdf' });
+        const url   = URL.createObjectURL(blob);
+
+        setProgress(100);
+        setStatus('เปิดหน้าต่างปริ้น PDF...');
+
+        const win = window.open(url);
+        if (win) {
+          win.onload = () => {
+            setTimeout(() => { win.print(); URL.revokeObjectURL(url); }, 600);
+          };
+          setStatus('');
+        } else {
+          const a = document.createElement('a');
+          a.href = url; a.download = 'merged_print.pdf'; a.click();
+          setStatus('Popup ถูกบล็อก — ดาวน์โหลดไฟล์รวมให้แล้ว ปริ้นเองได้เลย');
+        }
+      } catch (err) {
+        setStatus('เกิดข้อผิดพลาด PDF: ' + err.message, true);
       }
+    }
 
-      setStatus('กำลังสร้างไฟล์...');
-      setProgress(90);
+    // ── ปริ้น Word ─────────────────────────────────
+    for (const file of wordFiles) {
+      setStatus(`กำลังแปลง Word: ${file.name}`);
+      try {
+        if (!window.mammoth) {
+          setStatus('ไม่พบ mammoth.js — กรุณาเพิ่ม script ใน index.html', true);
+          break;
+        }
 
-      const bytes = await merged.save();
-      const blob  = new Blob([bytes], { type: 'application/pdf' });
-      const url   = URL.createObjectURL(blob);
+        const buf    = await file.arrayBuffer();
+        const result = await mammoth.convertToHtml({ arrayBuffer: buf });
 
-      setProgress(100);
-      setStatus('เปิดหน้าต่างปริ้น...');
+        const printWin = window.open('', '_blank');
+        if (!printWin) {
+          setStatus('Popup ถูกบล็อก — กรุณาอนุญาต popup แล้วลองใหม่', true);
+          break;
+        }
 
-      const win = window.open(url);
-      if (win) {
-        win.onload = () => {
-          setTimeout(() => {
-            win.print();
-            URL.revokeObjectURL(url);
-          }, 600);
-        };
+        printWin.document.write(`
+          <!DOCTYPE html><html><head>
+          <meta charset="UTF-8"/>
+          <title>${file.name}</title>
+          <style>
+            body {
+              font-family: 'TH Sarabun New', Sarabun, 'Angsana New', sans-serif;
+              font-size: 14pt; line-height: 1.8;
+              max-width: 800px; margin: 40px auto; color: #111;
+            }
+            h1,h2,h3 { margin: 1em 0 0.4em; }
+            p { margin: 0.4em 0; }
+            table { border-collapse: collapse; width: 100%; }
+            td, th { border: 1px solid #ccc; padding: 6px 10px; }
+            img { max-width: 100%; }
+            @media print { body { margin: 0; } }
+          </style>
+          </head><body>${result.value}</body></html>
+        `);
+        printWin.document.close();
+        printWin.onload = () => { setTimeout(() => printWin.print(), 600); };
         setStatus('');
-      } else {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'merged_print.pdf';
-        a.click();
-        setStatus('Popup ถูกบล็อก — ดาวน์โหลดไฟล์รวมให้แล้ว ปริ้นเองได้เลย');
+
+        // รอให้ปริ้นเสร็จก่อนเปิดไฟล์ถัดไป
+        await new Promise(r => setTimeout(r, 2000));
+
+      } catch (err) {
+        setStatus(`แปลง ${file.name} ไม่ได้: ` + err.message, true);
       }
-    } catch (err) {
-      setStatus('เกิดข้อผิดพลาด: ' + err.message, true);
     }
 
     setProgress(100);
@@ -192,21 +257,11 @@ const PdfPrint = (() => {
     const fi = document.getElementById('file-input');
     if (!dz || !fi) return;
 
-    fi.addEventListener('change', e => {
-      addFiles(e.target.files);
-      e.target.value = '';
-    });
-
-    dz.addEventListener('dragover', e => {
-      e.preventDefault();
-      dz.classList.add('drag-over');
-    });
-
+    fi.addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; });
+    dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
     dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-
     dz.addEventListener('drop', e => {
-      e.preventDefault();
-      dz.classList.remove('drag-over');
+      e.preventDefault(); dz.classList.remove('drag-over');
       addFiles(e.dataTransfer.files);
     });
   }
@@ -220,8 +275,8 @@ const PdfPrint = (() => {
       <div class="page">
         <div class="page-header">
           <span class="page-eyebrow">Tool 01</span>
-          <h1 class="page-title">PDF Batch <em>Print</em></h1>
-          <p class="page-desc">เลือกไฟล์ PDF หลายไฟล์ เลือกว่าจะปริ้นไฟล์ไหน แล้วส่งออกทีเดียว — ทุกอย่างทำงานบนเครื่องคุณ ไม่มีข้อมูลออกไปไหน</p>
+          <h1 class="page-title">PDF & Word Batch <em>Print</em></h1>
+          <p class="page-desc">เลือกไฟล์ PDF หรือ Word หลายไฟล์ เลือกว่าจะปริ้นไฟล์ไหน แล้วส่งออกทีเดียว — ทุกอย่างทำงานบนเครื่องคุณ ไม่มีข้อมูลออกไปไหน</p>
         </div>
 
         <div class="drop-zone" id="pdf-drop-zone" onclick="document.getElementById('file-input').click()">
@@ -231,8 +286,8 @@ const PdfPrint = (() => {
             </svg>
           </div>
           <p class="drop-title">ลากไฟล์มาวางที่นี่</p>
-          <p class="drop-sub">รองรับ PDF หลายไฟล์พร้อมกัน<br/><strong>คลิกเพื่อเปิด File Browser</strong></p>
-          <input type="file" id="file-input" accept=".pdf" multiple/>
+          <p class="drop-sub">รองรับ PDF และ Word (.doc, .docx) หลายไฟล์พร้อมกัน<br/><strong>คลิกเพื่อเปิด File Browser</strong></p>
+          <input type="file" id="file-input" accept=".pdf,.doc,.docx" multiple/>
         </div>
 
         <div class="file-section" id="pdf-file-section" style="display:none">
