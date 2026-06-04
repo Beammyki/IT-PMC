@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────
-   pdf-print.js — PDF & Word Batch Print Tool
+   pdf-print.js — PDF, Image & Word Batch Print Tool
    ───────────────────────────────────────────── */
 
 const PdfPrint = (() => {
@@ -34,10 +34,9 @@ const PdfPrint = (() => {
 
   function isValidFile(f) {
     const ext = getExt(f);
-    return f.type === 'application/pdf'
-      || ext === 'pdf'
-      || ext === 'doc'
-      || ext === 'docx';
+    return f.type === 'application/pdf' || ext === 'pdf'
+        || ext === 'doc' || ext === 'docx'
+        || f.type.startsWith('image/') || ['jpg', 'jpeg', 'png'].includes(ext);
   }
 
   /* ── File Management ── */
@@ -99,6 +98,12 @@ const PdfPrint = (() => {
     files.forEach((f, i) => {
       const isSel = selected.has(i);
       const ext   = getExt(f).toUpperCase();
+      
+      // กำหนดสีของ Tag ให้ชัดเจนขึ้น
+      let tagColor = '#e25c5c'; // PDF
+      if (['DOC', 'DOCX'].includes(ext)) tagColor = '#2b579a'; // Word
+      if (['JPG', 'JPEG', 'PNG'].includes(ext)) tagColor = '#4caf50'; // Images
+
       const item  = document.createElement('div');
       item.className = 'file-item' + (isSel ? ' selected' : '');
       item.style.animationDelay = (i * 0.04) + 's';
@@ -110,7 +115,7 @@ const PdfPrint = (() => {
             <path d="M2 5l2.5 2.5L8 2.5" stroke="#0C0B09" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <span class="pdf-tag">${ext}</span>
+        <span class="pdf-tag" style="background-color: ${tagColor}">${ext}</span>
         <span class="file-name" title="${f.name}">${f.name}</span>
         <span class="file-size">${formatBytes(f.size)}</span>
         <button class="file-remove" onclick="event.stopPropagation(); PdfPrint.removeFile(${i})" title="ลบออก">×</button>
@@ -128,11 +133,14 @@ const PdfPrint = (() => {
     if (subtitle) {
       const pdfCount  = sel.filter(f => getExt(f) === 'pdf').length;
       const wordCount = sel.filter(f => ['doc','docx'].includes(getExt(f))).length;
-      let desc = '';
-      if (pdfCount > 0 && wordCount > 0) desc = `PDF ${pdfCount} ไฟล์ + Word ${wordCount} ไฟล์`;
-      else if (pdfCount > 0) desc = `PDF ${pdfCount} ไฟล์ รวมเป็นไฟล์เดียวแล้วปริ้น`;
-      else desc = `Word ${wordCount} ไฟล์ แปลงแล้วปริ้น`;
-      subtitle.textContent = desc;
+      const imgCount  = sel.filter(f => ['jpg','jpeg','png'].includes(getExt(f))).length;
+      
+      let descParts = [];
+      if (pdfCount > 0) descParts.push(`PDF ${pdfCount} ไฟล์`);
+      if (imgCount > 0) descParts.push(`รูปภาพ ${imgCount} ไฟล์`);
+      if (wordCount > 0) descParts.push(`Word ${wordCount} ไฟล์`);
+      
+      subtitle.textContent = descParts.join(' + ') + ' เตรียมปริ้น';
     }
 
     if (list) {
@@ -153,26 +161,42 @@ const PdfPrint = (() => {
     const printBtn = document.getElementById('pdf-print-btn');
     if (printBtn) printBtn.disabled = true;
 
-    const pdfFiles  = sel.filter(f => getExt(f) === 'pdf');
-    const wordFiles = sel.filter(f => ['doc','docx'].includes(getExt(f)));
+    const pdfAndImgFiles = sel.filter(f => ['pdf','jpg','jpeg','png'].includes(getExt(f)));
+    const wordFiles      = sel.filter(f => ['doc','docx'].includes(getExt(f)));
 
-    // ── ปริ้น PDF ──────────────────────────────────
-    if (pdfFiles.length > 0) {
+    // ── ปริ้น PDF & รูปภาพ (จับรวมกันแล้วปริ้นทีเดียว) ──
+    if (pdfAndImgFiles.length > 0) {
       setProgress(0);
-      setStatus('กำลังโหลดและรวมไฟล์ PDF...');
+      setStatus('กำลังโหลดและประมวลผลไฟล์ PDF / รูปภาพ...');
       try {
         const merged = await PDFLib.PDFDocument.create();
 
-        for (let i = 0; i < pdfFiles.length; i++) {
-          setStatus(`กำลังประมวลผล: ${pdfFiles[i].name}`);
-          const buffer = await pdfFiles[i].arrayBuffer();
-          const pdf    = await PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
-          const pages  = await merged.copyPages(pdf, pdf.getPageIndices());
-          pages.forEach(p => merged.addPage(p));
-          setProgress(Math.round(((i + 1) / pdfFiles.length) * 75));
+        for (let i = 0; i < pdfAndImgFiles.length; i++) {
+          const file = pdfAndImgFiles[i];
+          const ext = getExt(file);
+          setStatus(`กำลังประมวลผล: ${file.name}`);
+          const buffer = await file.arrayBuffer();
+
+          if (ext === 'pdf') {
+            const pdf   = await PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+            const pages = await merged.copyPages(pdf, pdf.getPageIndices());
+            pages.forEach(p => merged.addPage(p));
+          } else {
+            // กรณีเป็นรูปภาพ (JPG, PNG)
+            let image;
+            if (['jpg', 'jpeg'].includes(ext)) {
+              image = await merged.embedJpg(buffer);
+            } else {
+              image = await merged.embedPng(buffer);
+            }
+            const page = merged.addPage([image.width, image.height]);
+            page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+          }
+          
+          setProgress(Math.round(((i + 1) / pdfAndImgFiles.length) * 75));
         }
 
-        setStatus('กำลังสร้างไฟล์...');
+        setStatus('กำลังสร้างไฟล์สำหรับปริ้น...');
         setProgress(90);
 
         const bytes = await merged.save();
@@ -180,7 +204,7 @@ const PdfPrint = (() => {
         const url   = URL.createObjectURL(blob);
 
         setProgress(100);
-        setStatus('เปิดหน้าต่างปริ้น PDF...');
+        setStatus('เปิดหน้าต่างปริ้น...');
 
         const win = window.open(url);
         if (win) {
@@ -190,15 +214,15 @@ const PdfPrint = (() => {
           setStatus('');
         } else {
           const a = document.createElement('a');
-          a.href = url; a.download = 'merged_print.pdf'; a.click();
-          setStatus('Popup ถูกบล็อก — ดาวน์โหลดไฟล์รวมให้แล้ว ปริ้นเองได้เลย');
+          a.href = url; a.download = 'batch_print.pdf'; a.click();
+          setStatus('Popup ถูกบล็อก — ดาวน์โหลดไฟล์แล้ว กดปริ้นด้วยตัวเองได้เลย');
         }
       } catch (err) {
-        setStatus('เกิดข้อผิดพลาด PDF: ' + err.message, true);
+        setStatus('เกิดข้อผิดพลาดในการประมวลผล: ' + err.message, true);
       }
     }
 
-    // ── ปริ้น Word ─────────────────────────────────
+    // ── ปริ้น Word (ทำงานแบบทีละไฟล์เหมือนเดิม) ──
     for (const file of wordFiles) {
       setStatus(`กำลังแปลง Word: ${file.name}`);
       try {
@@ -239,7 +263,6 @@ const PdfPrint = (() => {
         printWin.onload = () => { setTimeout(() => printWin.print(), 600); };
         setStatus('');
 
-        // รอให้ปริ้นเสร็จก่อนเปิดไฟล์ถัดไป
         await new Promise(r => setTimeout(r, 2000));
 
       } catch (err) {
@@ -275,8 +298,8 @@ const PdfPrint = (() => {
       <div class="page">
         <div class="page-header">
           <span class="page-eyebrow">Tool 01</span>
-          <h1 class="page-title">PDF & Word Batch <em>Print</em></h1>
-          <p class="page-desc">เลือกไฟล์ PDF หรือ Word หลายไฟล์ เลือกว่าจะปริ้นไฟล์ไหน แล้วส่งออกทีเดียว — ทุกอย่างทำงานบนเครื่องคุณ ไม่มีข้อมูลออกไปไหน</p>
+          <h1 class="page-title">PDF, Image & Word Batch <em>Print</em></h1>
+          <p class="page-desc">เลือกลากไฟล์ PDF, รูปภาพ (JPG, PNG) หรือ Word หลายๆ ไฟล์มารวมกัน แล้วกดส่งปริ้นรวดเดียวจบในหน้าเดียว</p>
         </div>
 
         <div class="drop-zone" id="pdf-drop-zone" onclick="document.getElementById('file-input').click()">
@@ -286,8 +309,8 @@ const PdfPrint = (() => {
             </svg>
           </div>
           <p class="drop-title">ลากไฟล์มาวางที่นี่</p>
-          <p class="drop-sub">รองรับ PDF และ Word (.doc, .docx) หลายไฟล์พร้อมกัน<br/><strong>คลิกเพื่อเปิด File Browser</strong></p>
-          <input type="file" id="file-input" accept=".pdf,.doc,.docx" multiple/>
+          <p class="drop-sub">รองรับ PDF, JPG, PNG และ Word (.doc, .docx)<br/><strong>คลิกเพื่อเปิด File Browser</strong></p>
+          <input type="file" id="file-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple style="display:none"/>
         </div>
 
         <div class="file-section" id="pdf-file-section" style="display:none">

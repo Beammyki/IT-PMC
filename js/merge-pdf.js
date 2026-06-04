@@ -9,8 +9,14 @@ const MergePdf = (() => {
 
   function addFiles(newFiles) {
     for (const f of newFiles) {
-      if ((f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'))
-          && !files.find(x => x.name === f.name && x.size === f.size)) {
+      const nameLower = f.name.toLowerCase();
+      // เช็คว่าเป็น PDF หรือ รูปภาพ JPG/PNG
+      const isValidType = f.type === 'application/pdf' || 
+                          nameLower.endsWith('.pdf') || 
+                          f.type.startsWith('image/') || 
+                          nameLower.match(/\.(jpg|jpeg|png)$/);
+
+      if (isValidType && !files.find(x => x.name === f.name && x.size === f.size)) {
         files.push(f);
       }
     }
@@ -51,11 +57,16 @@ const MergePdf = (() => {
 
     list.innerHTML = '';
     files.forEach((f, i) => {
+      // ตรวจสอบนามสกุลไฟล์เพื่อแสดง Tag ให้ถูกต้อง
+      const isPdf = f.name.toLowerCase().endsWith('.pdf');
+      const tagLabel = isPdf ? 'PDF' : 'IMG';
+      const tagColor = isPdf ? '#e25c5c' : '#4caf50'; // แยกสีให้ดูง่ายขึ้น (แดง=PDF, เขียว=รูปภาพ)
+
       const div = document.createElement('div');
       div.className = 'file-item';
       div.style.animationDelay = (i * 0.04) + 's';
       div.innerHTML = `
-        <span class="pdf-tag">PDF</span>
+        <span class="pdf-tag" style="background-color: ${tagColor}">${tagLabel}</span>
         <span class="file-name" title="${f.name}">${f.name}</span>
         <span class="file-size">${fmt(f.size)}</span>
         <div style="display:flex;gap:4px;flex-shrink:0">
@@ -73,16 +84,43 @@ const MergePdf = (() => {
     if (btn) btn.disabled = true;
     setProgress(0);
     setStatus('กำลังรวมไฟล์...');
+    
     try {
       const merged = await PDFLib.PDFDocument.create();
+      
       for (let i = 0; i < files.length; i++) {
         setStatus(`กำลังโหลด: ${files[i].name}`);
         const buf = await files[i].arrayBuffer();
-        const pdf = await PDFLib.PDFDocument.load(buf, { ignoreEncryption: true });
-        const pages = await merged.copyPages(pdf, pdf.getPageIndices());
-        pages.forEach(p => merged.addPage(p));
+        const nameLower = files[i].name.toLowerCase();
+
+        // กรณีเป็นไฟล์ PDF
+        if (nameLower.endsWith('.pdf') || files[i].type === 'application/pdf') {
+          const pdf = await PDFLib.PDFDocument.load(buf, { ignoreEncryption: true });
+          const pages = await merged.copyPages(pdf, pdf.getPageIndices());
+          pages.forEach(p => merged.addPage(p));
+        } 
+        // กรณีเป็นไฟล์รูปภาพ (JPG / PNG)
+        else {
+          let image;
+          if (nameLower.match(/\.(jpg|jpeg)$/) || files[i].type === 'image/jpeg') {
+            image = await merged.embedJpg(buf);
+          } else {
+            image = await merged.embedPng(buf);
+          }
+          
+          // สร้างหน้าใหม่โดยให้ขนาดความกว้าง/สูง เท่ากับขนาดของรูปภาพพอดี
+          const page = merged.addPage([image.width, image.height]);
+          page.drawImage(image, {
+            x: 0,
+            y: 0,
+            width: image.width,
+            height: image.height,
+          });
+        }
+        
         setProgress(Math.round(((i + 1) / files.length) * 85));
       }
+      
       setStatus('กำลังสร้างไฟล์...');
       setProgress(95);
       const bytes = await merged.save();
@@ -98,6 +136,7 @@ const MergePdf = (() => {
     } catch (e) {
       setStatus('เกิดข้อผิดพลาด: ' + e.message, true);
     }
+    
     if (btn) btn.disabled = files.length < 2;
   }
 
@@ -106,8 +145,8 @@ const MergePdf = (() => {
       <div class="page">
         <div class="page-header">
           <span class="page-eyebrow">Tool 02</span>
-          <h1 class="page-title">Merge <em>PDF</em></h1>
-          <p class="page-desc">รวม PDF หลายไฟล์เป็นไฟล์เดียว กด ↑↓ เพื่อเรียงลำดับหน้า แล้วดาวน์โหลด</p>
+          <h1 class="page-title">Merge <em>PDF & Images</em></h1>
+          <p class="page-desc">รวมไฟล์ PDF และรูปภาพ (JPG, PNG) เป็นไฟล์เดียว กด ↑↓ เพื่อเรียงลำดับหน้า แล้วดาวน์โหลด</p>
         </div>
 
         <div class="drop-zone" id="merge-drop-zone" onclick="document.getElementById('merge-input').click()">
@@ -116,9 +155,9 @@ const MergePdf = (() => {
               <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
             </svg>
           </div>
-          <p class="drop-title">เลือกไฟล์ PDF ที่จะรวม</p>
+          <p class="drop-title">เลือกไฟล์ PDF หรือรูปภาพ (JPG/PNG)</p>
           <p class="drop-sub">ต้องการอย่างน้อย 2 ไฟล์ขึ้นไป<br/><strong>คลิกหรือลากไฟล์มาวาง</strong></p>
-          <input type="file" id="merge-input" accept=".pdf" multiple style="display:none"/>
+          <input type="file" id="merge-input" accept=".pdf, .jpg, .jpeg, .png" multiple style="display:none"/>
         </div>
 
         <div class="file-section" id="merge-file-section" style="display:none">

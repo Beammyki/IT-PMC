@@ -83,7 +83,7 @@ function renderHome() {
       label: 'HR',
       items: [
         { id:'cert',   num:'09', title:'Certificate',       desc:'ระบบออกใบรับรองพนักงาน',          icon:'card-icon--gold', svg:'M8 1l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z',     url:'https://hr-certificate.pages.dev/' },
-        { id:'salary', num:'10', title:'ระบบเงินเดือน HR', desc:'ระบบจัดการเงินเดือนพนักงาน',      icon:'card-icon--teal', svg:'M2 4h12v8H2zM5 4V2h6v2M8 7v3M6 9h4',          url:'http://192.168.78.80:8501/' },
+        { id:'salary', num:'10', title:'ระบบเงินเดือน HR', desc:'ระบบจัดการเงินเดือนพนักงาน',      icon:'card-icon--teal', svg:'M2 4h12v8H2zM5 4V2h6v2M8 7v3M6 9h4',          url:'http://192.168.78.42:8501/' },
       ]
     },
     {
