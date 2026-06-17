@@ -24,9 +24,9 @@ const WordToPdf = (() => {
 
   function addFiles(newFiles) {
     for (const f of newFiles) {
-      const ext = f.name.toLowerCase();
-      if ((ext.endsWith('.doc') || ext.endsWith('.docx'))
-        && !files.find(x => x.name === f.name && x.size === f.size)) {
+      const name = f.name.toLowerCase();
+      if ((name.endsWith('.doc') || name.endsWith('.docx'))
+        && !files.find(x => x.file.name === f.name && x.file.size === f.size)) {
         files.push({ file: f, status: 'pending' });
       }
     }
@@ -70,64 +70,135 @@ const WordToPdf = (() => {
     });
   }
 
+  /* ── Convert single DOCX → PDF blob ────────── */
+  async function convertOneFile(file) {
+    const container = document.createElement('div');
+    container.style.cssText =
+      'position:fixed;left:0;top:0;width:fit-content;background:#fff;'
+      + 'z-index:-1;opacity:0;pointer-events:none;';
+    document.body.appendChild(container);
+
+    try {
+      const buf = await file.arrayBuffer();
+
+      // Render DOCX via docx-preview
+      await docx.renderAsync(buf, container, null, {
+        inWrapper: true,
+        ignoreWidth: false,
+        ignoreHeight: false,
+        breakPages: true,
+        renderHeaders: true,
+        renderFooters: true,
+        renderFootnotes: true,
+      });
+
+      // Show for html2canvas capture
+      container.style.opacity = '1';
+      container.style.zIndex  = '99999';
+      await new Promise(r => setTimeout(r, 800));
+
+      // Collect page sections
+      const wrapper  = container.querySelector('.docx-wrapper');
+      const sections = wrapper
+        ? Array.from(wrapper.querySelectorAll(':scope > section'))
+        : [container];
+      if (!sections.length) throw new Error('ไม่พบหน้าเอกสาร');
+
+      // Capture each page → build PDF
+      const { jsPDF } = window.jspdf;
+      let pdf = null;
+
+      for (let i = 0; i < sections.length; i++) {
+        const sec    = sections[i];
+        const canvas = await html2canvas(sec, {
+          scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
+        });
+
+        const wMm = sec.offsetWidth  * 25.4 / 96;
+        const hMm = sec.offsetHeight * 25.4 / 96;
+        const ori = wMm > hMm ? 'l' : 'p';
+
+        if (i === 0) {
+          pdf = new jsPDF({ orientation: ori, unit: 'mm', format: [wMm, hMm] });
+        } else {
+          pdf.addPage([wMm, hMm], ori);
+        }
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, wMm, hMm);
+      }
+
+      return pdf.output('blob');
+    } finally {
+      container.remove();
+    }
+  }
+
+  /* ── Main convert action ───────────────────── */
   async function doConvert() {
-    const url = document.getElementById('w2p-worker-url').value.trim();
-    if (!url) { setStatus('กรุณาใส่ Worker URL ก่อนครับ', true); return; }
     if (!files.length) return;
+
+    if (typeof docx === 'undefined' || !docx.renderAsync) {
+      setStatus('โหลด docx-preview ไม่สำเร็จ — ตรวจสอบ internet', true); return;
+    }
+    if (typeof html2canvas === 'undefined') {
+      setStatus('โหลด html2canvas ไม่สำเร็จ', true); return;
+    }
+    if (typeof jspdf === 'undefined') {
+      setStatus('โหลด jsPDF ไม่สำเร็จ', true); return;
+    }
 
     const btn = document.getElementById('w2p-btn');
     if (btn) btn.disabled = true;
-    setProgress(10);
-    setStatus('กำลังส่งไฟล์ไปแปลง...');
+    setProgress(5);
 
-    try {
-      const formData = new FormData();
-      formData.append('tool', 'word2pdf');
-      files.forEach((item, i) => formData.append(`file_${i}`, item.file));
+    let ok = 0, fail = 0;
+    const blobs = [];
 
-      setProgress(30);
-      const res = await fetch(url, { method: 'POST', body: formData });
-      if (!res.ok) throw new Error(`Worker error: ${res.status}`);
+    for (let i = 0; i < files.length; i++) {
+      const item = files[i];
+      setStatus(`กำลังแปลง ${item.file.name}  (${i + 1}/${files.length})...`);
+      setProgress(Math.round((i / files.length) * 90) + 5);
 
-      const results = await res.json();
-      setProgress(80);
-
-      const zip = new JSZip();
-      let ok = 0, fail = 0;
-
-      results.forEach((r, i) => {
-        if (r.success) {
-          zip.file(r.name, new Uint8Array(r.data));
-          files[i].status = 'success';
-          ok++;
-        } else {
-          files[i].status = 'error';
-          fail++;
-        }
-      });
-
-      render();
-      setProgress(95);
-
-      if (ok > 0) {
-        const blob = await zip.generateAsync({ type: 'blob' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = ok === 1 ? results.find(r => r.success).name : 'converted_pdfs.zip';
-        a.click();
-        URL.revokeObjectURL(a.href);
+      try {
+        const blob    = await convertOneFile(item.file);
+        const pdfName = item.file.name.replace(/\.docx?$/i, '.pdf');
+        blobs.push({ name: pdfName, blob });
+        item.status = 'success';
+        ok++;
+      } catch (err) {
+        console.error('Convert error:', err);
+        item.status = 'error';
+        fail++;
       }
-
-      setProgress(100);
-      setStatus(`✓ แปลงสำเร็จ ${ok} ไฟล์` + (fail > 0 ? ` · ✗ ล้มเหลว ${fail} ไฟล์` : ''));
-
-    } catch (err) {
-      setStatus('เกิดข้อผิดพลาด: ' + err.message, true);
+      render();
     }
 
+    setProgress(95);
+
+    // Download
+    if (ok === 1) {
+      const { name, blob } = blobs[0];
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } else if (ok > 1) {
+      const zip = new JSZip();
+      blobs.forEach(b => zip.file(b.name, b.blob));
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(zipBlob);
+      a.download = 'converted_pdfs.zip';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    setProgress(100);
+    setStatus(`✓ แปลงสำเร็จ ${ok} ไฟล์` + (fail ? ` · ✗ ล้มเหลว ${fail} ไฟล์` : ''));
     if (btn) btn.disabled = files.length === 0;
   }
 
+  /* ── Render Page ────────────────────────────── */
   function renderPage() {
     files.length = 0;
     document.getElementById('page-container').innerHTML = `
@@ -135,21 +206,14 @@ const WordToPdf = (() => {
         <div class="page-header">
           <span class="page-eyebrow">Tool</span>
           <h1 class="page-title">Word <em>to PDF</em></h1>
-          <p class="page-desc">แปลงไฟล์ Word (.doc, .docx) เป็น PDF ได้ formatting ตรงต้นฉบับ — ผ่าน Cloudflare Worker</p>
+          <p class="page-desc">แปลงไฟล์ Word (.docx) เป็น PDF ได้ formatting ใกล้เคียงต้นฉบับ — ทำงานบนเบราว์เซอร์ทั้งหมด ไม่มีการอัปโหลด</p>
         </div>
 
-        <!-- Worker URL -->
-        <div style="max-width:600px;margin-bottom:16px;padding:14px 16px;
-          background:var(--surface);border:1px solid var(--border2);border-radius:var(--r)">
-          <p style="font-size:10px;font-family:'DM Mono',monospace;color:var(--cyan);letter-spacing:1px;margin-bottom:8px">// CLOUDFLARE WORKER URL</p>
-          <input type="text" id="w2p-worker-url"
-            placeholder="https://pdf-lock-worker.YOUR_NAME.workers.dev"
-            style="width:100%;font-size:12px;font-family:'DM Mono',monospace;
-              background:var(--bg);border:1px solid var(--border2);border-radius:6px;
-              color:var(--text);padding:8px 12px;outline:none"/>
-          <p style="font-size:10px;color:var(--text-3);margin-top:6px;font-family:'DM Mono',monospace">
-            ใช้ Worker URL เดียวกับ PDF Lock ได้เลยครับ
-          </p>
+        <!-- Info note -->
+        <div style="max-width:600px;margin-bottom:14px;
+          padding:10px 14px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);
+          border-radius:var(--r);font-size:12px;color:var(--text-2);line-height:1.6">
+          ระบบจะ render เอกสาร Word บนเบราว์เซอร์แล้วแปลงเป็น PDF อัตโนมัติ — รองรับ <strong style="color:var(--gold)">.docx</strong> (ไม่รองรับ .doc รุ่นเก่า)
         </div>
 
         <!-- Drop zone -->
@@ -162,8 +226,8 @@ const WordToPdf = (() => {
             </svg>
           </div>
           <p class="drop-title">ลากไฟล์ Word มาวางที่นี่</p>
-          <p class="drop-sub">รองรับ .doc และ .docx หลายไฟล์พร้อมกัน<br/><strong>คลิกเพื่อเปิด File Browser</strong></p>
-          <input type="file" id="w2p-input" accept=".doc,.docx" multiple style="display:none"/>
+          <p class="drop-sub">รองรับ .docx หลายไฟล์พร้อมกัน<br/><strong>คลิกเพื่อเปิด File Browser</strong></p>
+          <input type="file" id="w2p-input" accept=".docx" multiple style="display:none"/>
         </div>
 
         <!-- File list -->
@@ -179,7 +243,7 @@ const WordToPdf = (() => {
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M2 8h12M10 4l4 4-4 4"/>
               </svg>
-              Convert & Download
+              Convert &amp; Download
             </button>
           </div>
           <div class="progress-track" id="w2p-track" style="max-width:600px">

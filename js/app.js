@@ -32,12 +32,27 @@ const PAGES = {
   merge:     { title: 'Merge PDF',          render: () => MergePdf.renderPage() },
   compress:  { title: 'Compress PDF',       render: () => CompressPdf.renderPage() },
   convert:   { title: 'Convert Files',      render: () => ConvertFiles.renderPage() },
-  sign:      { title: 'Sign PDF',           render: () => SignPdf.renderPage() },
+  split:     { title: 'Split & Organize',   render: () => SplitPdf.renderPage() },
+  pagenum:   { title: 'Add Page Numbers',   render: () => PageNum.renderPage() },
+  extract:   { title: 'Extract Images',     render: () => ExtractImages.renderPage() },
+  mailmerge: { title: 'PDF Mail Merge',     render: () => PdfMailMerge.renderPage() },
+
   lock:      { title: 'PDF Lock',           render: () => PdfLock.renderPage() },
   unlock:    { title: 'PDF Unlock',         render: () => PdfUnlock.renderPage() },
   watermark: { title: 'Remove Watermark',   render: () => RemoveWatermark.renderPage() },
+  'add-wm':  { title: 'Add Watermark',      render: () => AddWatermark.renderPage() },
+  redactor:  { title: 'Document Redactor',  render: () => PdfRedactor.renderPage() },
+  
+  ocr:       { title: 'Image to Text (OCR)',render: () => OcrTool.renderPage() },
+  resizer:   { title: 'Bulk Resizer',       render: () => BulkResizer.renderPage() },
+  collage:   { title: 'Slip Collage',       render: () => SlipCollage.renderPage() },
+  
+  qr:        { title: 'Batch QR Code',      render: () => BatchQr.renderPage() },
+  cleaner:   { title: 'Data Cleaner',       render: () => DataCleaner.renderPage() },
+  renamer:   { title: 'Batch Renamer',      render: () => BatchRenamer.renderPage() },
+  csv:       { title: 'CSV Merger/Splitter',render: () => CsvMerger.renderPage() },
+  
   schedprint: { title: 'Scheduled Print',   render: () => ScheduledPrint.renderPage() },
-  word2pdf: { title: 'Word to PDF', render: () => WordToPdf.renderPage() },
 };
 
 /* ═══════════════════════════════
@@ -65,25 +80,50 @@ function navigate(pageId) {
 function renderHome() {
   const sections = [
     {
-      label: 'Tools',
+      label: 'PDF Tools',
       items: [
         { id:'pdf',       num:'01', title:'PDF Batch Print',  desc:'เลือกและปริ้น PDF หลายไฟล์พร้อมกัน',     icon:'card-icon--gold', svg:'M4 6V1.5h5l2 2V6M4 12H2.5A1.5 1.5 0 011 10.5v-3A1.5 1.5 0 012.5 6h11A1.5 1.5 0 0115 7.5v3A1.5 1.5 0 0113.5 12H12M4 9.5h8V15H4z' },
         { id:'merge',     num:'02', title:'Merge PDF',         desc:'รวมหลาย PDF เป็นไฟล์เดียว',              icon:'card-icon--blue', svg:'M3 4h10M3 8h7M3 12h4' },
-        { id:'compress',  num:'03', title:'Compress PDF',      desc:'บีบอัด PDF ให้เล็กลง',                   icon:'card-icon--teal', svg:'M8 2v12M5 5l3-3 3 3M5 11l3 3 3-3' },
-        { id:'convert',   num:'04', title:'Convert Files',     desc:'แปลงไฟล์ PDF ↔ Word ↔ Image',            icon:'card-icon--blue', svg:'M2 8h12M10 4l4 4-4 4' },
-        { id:'sign',      num:'05', title:'Sign PDF',           desc:'เซ็นเอกสารด้วยลายเซ็นดิจิทัล',         icon:'card-icon--rose', svg:'M2 12c2-4 4-8 5-8s0 4 2 4 2-4 3-4M2 14h12' },
-        { id:'lock',      num:'06', title:'PDF Lock',           desc:'ใส่รหัสผ่าน PDF หลายไฟล์พร้อมกัน',     icon:'card-icon--gold', svg:'M3 7h10v8H3zM5 7V5a3 3 0 016 0v2' },
-        { id:'unlock',    num:'07', title:'PDF Unlock',         desc:'ปลดล็อค PDF รหัสผ่านหลายไฟล์',         icon:'card-icon--gold', svg:'M3 7h10v8H3zM5 7V5a3 3 0 016 0' },
-        { id:'watermark', num:'08', title:'Remove Watermark',  desc:'ลบโลโก้และ watermark ออกจากรูป',        icon:'card-icon--rose', svg:'M3 3l10 10M3 13l10-10M8 1v2M8 13v2M1 8h2M13 8h2' },
-        { id:'schedprint', num:'09', title:'Scheduled Print', desc:'ตั้งเวลาปริ้นอัตโนมัติ กำหนดรอบและช่วงเวลาได้', icon:'card-icon--blue', svg:'M8 2a6 6 0 100 12A6 6 0 008 2zM8 5v3.5l2.5 1.5' },
-        { id:'word2pdf', num:'10', title:'Word to PDF', desc:'แปลง Word เป็น PDF ได้ formatting ตรงต้นฉบับ', icon:'card-icon--blue', svg:'M3 2h7l3 3v9H3zM10 2v3h3M6 7l2 5 2-5' },
+        { id:'split',     num:'03', title:'Split & Organize',  desc:'แยกหน้า สลับหน้า หรือลบหน้า PDF ทิ้ง',     icon:'card-icon--gold', svg:'M4 2v12M12 2v12M1 6h6M9 10h6' },
+        { id:'pagenum',   num:'04', title:'Add Page Numbers',  desc:'รันเลขหน้าอัตโนมัติลงใน PDF',            icon:'card-icon--gold', svg:'M2 2h8v12H2zM8 12h2' },
+        { id:'extract',   num:'05', title:'Extract Images',    desc:'ดึงรูปภาพทุกรูปออกจากไฟล์ PDF',           icon:'card-icon--teal', svg:'M2 14h12M4 10l4-4 4 4M8 6v8' },
+        { id:'mailmerge', num:'06', title:'PDF Mail Merge',    desc:'สร้างเอกสาร 100 ไฟล์จาก Excel',           icon:'card-icon--rose', svg:'M2 4h12v8H2zM2 4l6 4 6-4' },
+        { id:'compress',  num:'07', title:'Compress PDF & Image',desc:'บีบอัด PDF และรูปภาพให้เล็กลง',         icon:'card-icon--teal', svg:'M8 2v12M5 5l3-3 3 3M5 11l3 3 3-3' },
+        { id:'convert',   num:'08', title:'Convert Files',     desc:'แปลงไฟล์ PDF ↔ Word ↔ Image',            icon:'card-icon--blue', svg:'M2 8h12M10 4l4 4-4 4' },
+        { id:'lock',      num:'09', title:'PDF Lock',          desc:'ใส่รหัสผ่าน PDF หลายไฟล์พร้อมกัน',        icon:'card-icon--gold', svg:'M3 7h10v8H3zM5 7V5a3 3 0 016 0v2' },
+        { id:'unlock',    num:'10', title:'PDF Unlock',        desc:'ปลดล็อค PDF รหัสผ่านหลายไฟล์',           icon:'card-icon--gold', svg:'M3 7h10v8H3zM5 7V5a3 3 0 016 0' },
+        { id:'watermark', num:'11', title:'Remove Watermark',  desc:'ลบโลโก้และลายน้ำออกจากไฟล์',            icon:'card-icon--rose', svg:'M3 3l10 10M3 13l10-10M8 1v2M8 13v2M1 8h2M13 8h2' },
+        { id:'add-wm',    num:'12', title:'Add Watermark',     desc:'ประทับตราลายน้ำลงในเอกสาร PDF',      icon:'card-icon--blue', svg:'M12 4L4 12M4 4l8 8' },
+        { id:'redactor',  num:'13', title:'Document Redactor', desc:'เซ็นเซอร์ข้อมูลส่วนบุคคลก่อนส่งไฟล์',      icon:'card-icon--rose', svg:'M3 3h10v10H3z' },
+      ]
+    },
+    {
+      label: 'General Tools',
+      items: [
+        { id:'schedprint', num:'12', title:'Scheduled Print', desc:'ตั้งเวลาปริ้นอัตโนมัติ กำหนดรอบและช่วงเวลาได้', icon:'card-icon--blue', svg:'M8 2a6 6 0 100 12A6 6 0 008 2zM8 5v3.5l2.5 1.5' },
       ]
     },
     {
       label: 'HR',
       items: [
         { id:'cert',   num:'09', title:'Certificate',       desc:'ระบบออกใบรับรองพนักงาน',          icon:'card-icon--gold', svg:'M8 1l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z',     url:'https://hr-certificate.pages.dev/' },
-        { id:'salary', num:'10', title:'ระบบเงินเดือน HR', desc:'ระบบจัดการเงินเดือนพนักงาน',      icon:'card-icon--teal', svg:'M2 4h12v8H2zM5 4V2h6v2M8 7v3M6 9h4',          url:'http://192.168.78.42:8501/' },
+      ]
+    },
+    {
+      label: 'Data Tools',
+      items: [
+        { id:'qr',      num:'16', title:'Batch QR Code', desc:'สร้าง QR Code หลายรูปพร้อมกันจากลิงก์หรือข้อความ', icon:'card-icon--gold', svg:'M3 3h4v4H3zM9 3h4v4H9zM3 9h4v4H3zM9 9h4M9 13h4M13 9v4' },
+        { id:'cleaner', num:'17', title:'Data Cleaner',  desc:'ลบขยะ ลบข้อความซ้ำ จัดเรียงข้อมูล',              icon:'card-icon--rose', svg:'M4 3h8M4 8h8M4 13h8M2 3v0M2 8v0M2 13v0' },
+        { id:'renamer', num:'18', title:'Batch Renamer', desc:'เปลี่ยนชื่อไฟล์ทีละหลายๆ ไฟล์',                  icon:'card-icon--teal', svg:'M2 4h12v8H2zM2 8h12M6 4v8' },
+        { id:'csv',     num:'19', title:'CSV Tools',     desc:'รวมไฟล์ หรือ หั่นไฟล์ CSV',                     icon:'card-icon--blue', svg:'M2 4v8l4-2v-4L2 4zM14 4v8l-4-2v-4l4-2z' },
+      ]
+    },
+    {
+      label: 'Image Tools',
+      items: [
+        { id:'ocr',     num:'13', title:'Image to Text (OCR)', desc:'ดึงข้อความจากรูปภาพ (รองรับภาษาไทย)', icon:'card-icon--teal', svg:'M4 10h8M4 6h8M4 14h8' },
+        { id:'resizer', num:'14', title:'Bulk Resizer',        desc:'ย่อขนาดและแปลงสกุลรูปภาพทีละหลายรูป', icon:'card-icon--gold', svg:'M2 14l5-5m0 0H3m4 0v4M14 2L9 7m0 0h4M9 7V3' },
+        { id:'collage', num:'15', title:'Slip Collage',        desc:'จัดเรียงสลิปลง A4 อัตโนมัติ',        icon:'card-icon--blue', svg:'M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z' },
       ]
     },
     {

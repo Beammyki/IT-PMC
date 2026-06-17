@@ -14,7 +14,12 @@
   <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
   <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
   <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="js/word-to-pdf.js"></script>
+  <script src="https://unpkg.com/docx-preview/dist/docx-preview.js"></script>
+  <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://unpkg.com/tesseract.js@4.1.2/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   
 
   <link rel="stylesheet" href="css/style.css" />
@@ -65,9 +70,9 @@
     </a>
   </div>
 
-  <!-- Tools -->
+  <!-- PDF Tools -->
   <div class="nav-section">
-    <span class="nav-label">Tools</span>
+    <span class="nav-label">PDF Tools</span>
     <a class="nav-item" data-page="pdf" href="#pdf">
       <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6V1.5h5l2 2V6M4 12H2.5A1.5 1.5 0 011 10.5v-3A1.5 1.5 0 012.5 6h11A1.5 1.5 0 0115 7.5v3A1.5 1.5 0 0113.5 12H12M4 9.5h8V15H4V9.5z"/></svg></span>
       <span class="nav-text">PDF Batch Print</span>
@@ -78,19 +83,49 @@
       <span class="nav-text">Merge PDF</span>
       <span class="nav-live">LIVE</span>
     </a>
+    <a class="nav-item" data-page="split" href="#split">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 2v12M12 2v12M1 6h6M9 10h6"/></svg></span>
+      <span class="nav-text">Split & Organize</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+    <a class="nav-item" data-page="pagenum" href="#pagenum">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 2h8v12H2zM8 12h2"/></svg></span>
+      <span class="nav-text">Add Page Numbers</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+    <a class="nav-item" data-page="extract" href="#extract">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 14h12M4 10l4-4 4 4M8 6v8"/></svg></span>
+      <span class="nav-text">Extract Images</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+    <a class="nav-item" data-page="mailmerge" href="#mailmerge">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4h12v8H2zM2 4l6 4 6-4"/></svg></span>
+      <span class="nav-text">PDF Mail Merge</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+    <a class="nav-item" data-page="watermark" href="#watermark">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l10 10M3 13l10-10M8 1v2M8 13v2M1 8h2M13 8h2"/></svg></span>
+      <span class="nav-text">Remove Watermark</span>
+      <span class="nav-live">LIVE</span>
+    </a>
+    <a class="nav-item" data-page="add-wm" href="#add-wm">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M12 4L4 12M4 4l8 8"/></svg></span>
+      <span class="nav-text">Add Watermark</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+    <a class="nav-item" data-page="redactor" href="#redactor">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="3" y="3" width="10" height="10" rx="1"/></svg></span>
+      <span class="nav-text">Document Redactor</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
     <a class="nav-item" data-page="compress" href="#compress">
       <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v12M5 5l3-3 3 3M5 11l3 3 3-3"/></svg></span>
-      <span class="nav-text">Compress PDF</span>
+      <span class="nav-text">Compress PDF & Image</span>
       <span class="nav-live">LIVE</span>
     </a>
     <a class="nav-item" data-page="convert" href="#convert">
       <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h12M10 4l4 4-4 4"/></svg></span>
       <span class="nav-text">Convert Files</span>
-      <span class="nav-live">LIVE</span>
-    </a>
-    <a class="nav-item" data-page="sign" href="#sign">
-      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c2-4 4-8 5-8s0 4 2 4 2-4 3-4M2 14h12"/></svg></span>
-      <span class="nav-text">Sign PDF</span>
       <span class="nav-live">LIVE</span>
     </a>
     <a class="nav-item" data-page="lock" href="#lock">
@@ -103,29 +138,67 @@
       <span class="nav-text">PDF Unlock</span>
       <span class="nav-live">LIVE</span>
     </a>
-    <a class="nav-item" data-page="watermark" href="#watermark">
-      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l10 10M3 13l10-10M8 1v2M8 13v2M1 8h2M13 8h2"/></svg></span>
-      <span class="nav-text">Remove Watermark</span>
+  </div>
+
+  <!-- General Tools -->
+  <div class="nav-section">
+    <span class="nav-label">General Tools</span>
+    <a class="nav-item" data-page="schedprint" href="#schedprint">
+      <span class="nav-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2.5 1.5"/>
+        </svg>
+      </span>
+      <span class="nav-text">Scheduled Print</span>
       <span class="nav-live">LIVE</span>
     </a>
-    <a class="nav-item" data-page="schedprint" href="#schedprint">
-  <span class="nav-icon">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2.5 1.5"/>
-    </svg>
-  </span>
-  <span class="nav-text">Scheduled Print</span>
-  <span class="nav-live">LIVE</span>
-</a>
-<a class="nav-item" data-page="word2pdf" href="#word2pdf">
-  <span class="nav-icon">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 2h7l3 3v9H3zM10 2v3h3M6 7l2 5 2-5"/>
-    </svg>
-  </span>
-  <span class="nav-text">Word to PDF</span>
-  <span class="nav-live">LIVE</span>
-</a>
+  </div>
+
+  <!-- Image Tools -->
+  <div class="nav-section">
+    <span class="nav-label">Image Tools</span>
+    <a class="nav-item" data-page="ocr" href="#ocr">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2" ry="2"/><path d="M4 10h8M4 6h8M4 14h8"/></svg></span>
+      <span class="nav-text">Image to Text (OCR)</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+    <a class="nav-item" data-page="resizer" href="#resizer">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 14l5-5m0 0H3m4 0v4M14 2L9 7m0 0h4M9 7V3"/></svg></span>
+      <span class="nav-text">Bulk Resizer</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+    <a class="nav-item" data-page="collage" href="#collage">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="2" width="5" height="5"/><rect x="9" y="2" width="5" height="5"/><rect x="2" y="9" width="5" height="5"/><rect x="9" y="9" width="5" height="5"/></svg></span>
+      <span class="nav-text">Slip Collage</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+  </div>
+
+  <!-- Data Tools -->
+  <div class="nav-section">
+    <span class="nav-label">Data Tools</span>
+    <a class="nav-item" data-page="qr" href="#qr">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 3h4v4H3zM9 3h4v4H9zM3 9h4v4H3zM9 9h4M9 13h4M13 9v4"/></svg></span>
+      <span class="nav-text">Batch QR Code</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+    <a class="nav-item" data-page="cleaner" href="#cleaner">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 3h8M4 8h8M4 13h8M2 3v0M2 8v0M2 13v0"/></svg></span>
+      <span class="nav-text">Data Cleaner</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+    <a class="nav-item" data-page="renamer" href="#renamer">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4h12v8H2zM2 8h12M6 4v8"/></svg></span>
+      <span class="nav-text">Batch Renamer</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+    <a class="nav-item" data-page="csv" href="#csv">
+      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M2 4v8l4-2v-4L2 4zM14 4v8l-4-2v-4l4-2z"/></svg></span>
+      <span class="nav-text">CSV Merger/Splitter</span>
+      <span class="nav-live" style="background:var(--gold);color:#000">NEW</span>
+    </a>
+  </div>
+
 
   <!-- HR -->
   <div class="nav-section">
@@ -133,10 +206,6 @@
     <a class="nav-item" href="https://hr-certificate.pages.dev/" target="_blank">
       <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z"/></svg></span>
       <span class="nav-text">Certificate</span>
-    </a>
-    <a class="nav-item" href="http://192.168.78.42:8501/" target="_blank">
-      <span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h12v8H2zM5 4V2h6v2M8 7v3M6 9h4"/></svg></span>
-      <span class="nav-text">ระบบเงินเดือน HR</span>
     </a>
   </div>
 
@@ -248,7 +317,19 @@
 <script src="js/merge-pdf.js"></script>
 <script src="js/compress-pdf.js"></script>
 <script src="js/convert-files.js"></script>
-<script src="js/sign-pdf.js"></script>
+<script src="js/split-pdf.js"></script>
+<script src="js/page-number.js"></script>
+<script src="js/extract-images.js"></script>
+<script src="js/pdf-mail-merge.js"></script>
+<script src="js/add-watermark.js"></script>
+<script src="js/pdf-redactor.js"></script>
+<script src="js/ocr-tool.js"></script>
+<script src="js/bulk-resizer.js"></script>
+<script src="js/slip-collage.js"></script>
+<script src="js/batch-qr.js"></script>
+<script src="js/data-cleaner.js"></script>
+<script src="js/batch-renamer.js"></script>
+<script src="js/csv-merger.js"></script>
 <script src="js/remove-watermark.js"></script>
 <script src="js/app.js"></script>
 <script src="js/pdf-unlock.js"></script>
