@@ -44,7 +44,7 @@ const BulkResizer = (() => {
       const item = document.createElement('div');
       item.style.cssText = 'display:flex; justify-content:space-between; padding:8px 12px; background:rgba(255,255,255,0.02); border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; align-items:center;';
       item.innerHTML = `
-        <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">${file.name}</div>
+        <div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">${escapeHtml(file.name)}</div>
         <div style="color:var(--text-2); display:flex; align-items:center; gap:12px;">
           <span>${fmt(file.size)}</span>
           <button class="btn btn--ghost" style="padding:2px 6px; font-size:11px;" onclick="BulkResizer.removeFile(${idx})">ลบ</button>

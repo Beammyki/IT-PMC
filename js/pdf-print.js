@@ -116,7 +116,7 @@ const PdfPrint = (() => {
           </svg>
         </div>
         <span class="pdf-tag" style="background-color: ${tagColor}">${ext}</span>
-        <span class="file-name" title="${f.name}">${f.name}</span>
+        <span class="file-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
         <span class="file-size">${formatBytes(f.size)}</span>
         <button class="file-remove" onclick="event.stopPropagation(); PdfPrint.removeFile(${i})" title="ลบออก">×</button>
       `;
@@ -147,7 +147,7 @@ const PdfPrint = (() => {
       list.innerHTML = sel.map(f => `
         <div class="modal-file-item">
           <span class="pdf-tag">${getExt(f).toUpperCase()}</span>
-          <span>${f.name}</span>
+          <span>${escapeHtml(f.name)}</span>
         </div>
       `).join('');
     }
@@ -243,7 +243,7 @@ const PdfPrint = (() => {
         printWin.document.write(`
           <!DOCTYPE html><html><head>
           <meta charset="UTF-8"/>
-          <title>${file.name}</title>
+          <title>${escapeHtml(file.name)}</title>
           <style>
             body {
               font-family: 'TH Sarabun New', Sarabun, 'Angsana New', sans-serif;

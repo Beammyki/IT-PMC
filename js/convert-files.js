@@ -74,7 +74,7 @@ const ConvertFiles = (() => {
       div.style.alignItems = 'center';
       div.innerHTML = `
         <span class="pdf-tag">${ext}</span>
-        <span class="file-name" title="${item.file.name}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.file.name}</span>
+        <span class="file-name" title="${escapeHtml(item.file.name)}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(item.file.name)}</span>
         <span class="file-size">${fmt(item.file.size)}</span>
         ${icon}
         <button class="file-remove" onclick="ConvertFiles.removeFile(${i})">×</button>

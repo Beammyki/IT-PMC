@@ -23,11 +23,11 @@ const DataCleaner = (() => {
   function updateCounts() {
     const textIn = document.getElementById('dc-input').value;
     const linesIn = textIn.split('\\n').length;
-    document.getElementById('dc-count-in').textContent = \`บรรทัด: \${textIn === '' ? 0 : linesIn}\`;
+    document.getElementById('dc-count-in').textContent = `บรรทัด: ${textIn === '' ? 0 : linesIn}`;
 
     const textOut = document.getElementById('dc-output').value;
     const linesOut = textOut.split('\\n').length;
-    document.getElementById('dc-count-out').textContent = \`บรรทัด: \${textOut === '' ? 0 : linesOut}\`;
+    document.getElementById('dc-count-out').textContent = `บรรทัด: ${textOut === '' ? 0 : linesOut}`;
   }
 
   function processData() {
@@ -83,7 +83,7 @@ const DataCleaner = (() => {
     const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = \`cleaned_data_\${Date.now()}.csv\`;
+    a.download = `cleaned_data_${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
   }
@@ -96,7 +96,7 @@ const DataCleaner = (() => {
   }
 
   function renderPage() {
-    document.getElementById('page-container').innerHTML = \`
+    document.getElementById('page-container').innerHTML = `
       <div class="page">
         <div class="page-header">
           <span class="page-eyebrow">Data Tools</span>
@@ -169,7 +169,7 @@ const DataCleaner = (() => {
 
         </div>
       </div>
-    \`;
+    `;
   }
 
   return { renderPage, handleCsv, updateCounts, processData, copyText, downloadCsv, reset };

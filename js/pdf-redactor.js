@@ -43,7 +43,7 @@ const PdfRedactor = (() => {
       const { PDFDocument } = PDFLib;
       pdfLibDoc = await PDFDocument.load(fileBuffer);
       const total = pdfLibDoc.getPageCount();
-      document.getElementById('pr-info').textContent = \`ไฟล์: \${file.name} (\${total} หน้า)\`;
+      document.getElementById('pr-info').textContent = `ไฟล์: ${file.name} (${total} หน้า)`;
       
       // Load with pdf.js to render canvas
       const loadingTask = pdfjsLib.getDocument({ data: fileBuffer });
@@ -79,7 +79,7 @@ const PdfRedactor = (() => {
     await pdfPage.render(renderContext).promise;
     
     // Save base image
-    canvas.style.backgroundImage = \`url(\${canvas.toDataURL()})\`;
+    canvas.style.backgroundImage = `url(${canvas.toDataURL()})`;
     canvas.style.backgroundSize = 'contain';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -170,7 +170,7 @@ const PdfRedactor = (() => {
       a.href = URL.createObjectURL(blob);
       let newName = fileName;
       if (newName.endsWith('.pdf')) newName = newName.substring(0, newName.length - 4);
-      a.download = \`\${newName}_redacted.pdf\`;
+      a.download = `${newName}_redacted.pdf`;
       a.click();
       URL.revokeObjectURL(a.href);
       
@@ -195,7 +195,7 @@ const PdfRedactor = (() => {
   }
 
   function renderPage() {
-    document.getElementById('page-container').innerHTML = \`
+    document.getElementById('page-container').innerHTML = `
       <div class="page">
         <div class="page-header">
           <span class="page-eyebrow">PDF Tools</span>
@@ -249,7 +249,7 @@ const PdfRedactor = (() => {
           </div>
         </div>
       </div>
-    \`;
+    `;
   }
 
   return { renderPage, handleFile, processRedact, undo, reset };

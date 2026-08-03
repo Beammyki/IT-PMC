@@ -92,7 +92,7 @@ const SignPdf = (() => {
     if (info) info.innerHTML = `
       <div class="file-item selected" style="max-width:600px;margin-bottom:16px">
         <span class="pdf-tag">PDF</span>
-        <span class="file-name">${f.name}</span>
+        <span class="file-name">${escapeHtml(f.name)}</span>
         <button class="file-remove" onclick="SignPdf.clearFile()">×</button>
       </div>`;
     updateBtn();

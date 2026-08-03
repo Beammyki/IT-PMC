@@ -82,10 +82,10 @@ const PdfMailMerge = (() => {
         const match = csvHeaders.find(h => h.toLowerCase() === field.toLowerCase());
         
         html += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; align-items: center;">
-          <div style="font-size:13px;">${field}</div>
-          <select id="map-${field}" style="width:100%; padding:6px; background:#111; color:#fff; border:1px solid #333; border-radius:4px; font-size:12px;">
+          <div style="font-size:13px;">${escapeHtml(field)}</div>
+          <select id="map-${escapeHtml(field)}" style="width:100%; padding:6px; font-size:12px;">
             <option value="">-- ข้ามช่องนี้ --</option>
-            ${csvHeaders.map(h => `<option value="${h}" ${h === match ? 'selected' : ''}>${h}</option>`).join('')}
+            ${csvHeaders.map(h => `<option value="${escapeHtml(h)}" ${h === match ? 'selected' : ''}>${escapeHtml(h)}</option>`).join('')}
           </select>
         </div>`;
       });

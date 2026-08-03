@@ -72,11 +72,11 @@ const BatchQr = (() => {
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(zipBlob);
-      a.download = \`Batch_QRCode_\${Date.now()}.zip\`;
+      a.download = `Batch_QRCode_${Date.now()}.zip`;
       a.click();
       URL.revokeObjectURL(a.href);
       
-      setStatus(\`สร้างสำเร็จ \${items.length} รูป!\`);
+      setStatus(`สร้างสำเร็จ ${items.length} รูป!`);
     } catch (err) {
       console.error(err);
       setStatus('เกิดข้อผิดพลาด: ' + err.message, true);
@@ -93,7 +93,7 @@ const BatchQr = (() => {
   }
 
   function renderPage() {
-    document.getElementById('page-container').innerHTML = \`
+    document.getElementById('page-container').innerHTML = `
       <div class="page">
         <div class="page-header">
           <span class="page-eyebrow">Data Tools</span>
@@ -152,7 +152,7 @@ const BatchQr = (() => {
           </div>
         </div>
       </div>
-    \`;
+    `;
   }
 
   return { renderPage, handleCsv, updateCount, generateQRCodes, reset };

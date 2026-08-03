@@ -67,7 +67,7 @@ const MergePdf = (() => {
       div.style.animationDelay = (i * 0.04) + 's';
       div.innerHTML = `
         <span class="pdf-tag" style="background-color: ${tagColor}">${tagLabel}</span>
-        <span class="file-name" title="${f.name}">${f.name}</span>
+        <span class="file-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
         <span class="file-size">${fmt(f.size)}</span>
         <div style="display:flex;gap:4px;flex-shrink:0">
           <button class="action-btn" onclick="MergePdf.moveUp(${i})" ${i===0?'disabled':''} style="padding:3px 7px">↑</button>

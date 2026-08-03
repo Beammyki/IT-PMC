@@ -94,7 +94,7 @@ const PdfUnlock = (() => {
 
       div.innerHTML = `
         <span class="pdf-tag">PDF</span>
-        <span class="file-name" title="${item.file.name}">${item.file.name}</span>
+        <span class="file-name" title="${escapeHtml(item.file.name)}">${escapeHtml(item.file.name)}</span>
         <span class="file-size">${fmt(item.file.size)}</span>
         <input type="text" placeholder="รหัสผ่าน"
           value="${item.password}"

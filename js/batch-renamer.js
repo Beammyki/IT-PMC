@@ -78,27 +78,27 @@ const BatchRenamer = (() => {
       const item = document.createElement('div');
       item.style.cssText = 'display:flex; justify-content:space-between; padding:8px 12px; background:rgba(255,255,255,0.02); border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; align-items:center;';
       
-      let nameHtml = \`
+      let nameHtml = `
         <div style="display:flex; flex-direction:column;">
-          <span style="color:var(--text-2); text-decoration:line-through; font-size:11px;">\${file.name}</span>
-          <span style="color:\${isChanged ? 'var(--gold)' : '#fff'};">\${newName}</span>
+          <span style="color:var(--text-2); text-decoration:line-through; font-size:11px;">${escapeHtml(file.name)}</span>
+          <span style="color:${isChanged ? 'var(--gold)' : 'var(--text)'};">${escapeHtml(newName)}</span>
         </div>
-      \`;
+      `;
       
       if (!isChanged) {
-        nameHtml = \`<div>\${file.name}</div>\`;
+        nameHtml = `<div>${escapeHtml(file.name)}</div>`;
       }
       
-      item.innerHTML = \`
-        \${nameHtml}
+      item.innerHTML = `
+        ${nameHtml}
         <div style="color:var(--text-2); display:flex; align-items:center; gap:12px;">
-          <button class="btn btn--ghost" style="padding:2px 6px; font-size:11px;" onclick="BatchRenamer.removeFile(\${idx})">ลบ</button>
+          <button class="btn btn--ghost" style="padding:2px 6px; font-size:11px;" onclick="BatchRenamer.removeFile(${idx})">ลบ</button>
         </div>
-      \`;
+      `;
       listEl.appendChild(item);
     });
     
-    document.getElementById('rn-info').textContent = \`รายการไฟล์ (\${fileList.length})\`;
+    document.getElementById('rn-info').textContent = `รายการไฟล์ (${fileList.length})`;
     document.getElementById('rn-btn-process').disabled = fileList.length === 0;
   }
 
@@ -120,7 +120,7 @@ const BatchRenamer = (() => {
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(zipBlob);
-      a.download = \`Renamed_Files_\${Date.now()}.zip\`;
+      a.download = `Renamed_Files_${Date.now()}.zip`;
       a.click();
       URL.revokeObjectURL(a.href);
       
@@ -148,7 +148,7 @@ const BatchRenamer = (() => {
   }
 
   function renderPage() {
-    document.getElementById('page-container').innerHTML = \`
+    document.getElementById('page-container').innerHTML = `
       <div class="page">
         <div class="page-header">
           <span class="page-eyebrow">Data Tools</span>
@@ -223,7 +223,7 @@ const BatchRenamer = (() => {
           </div>
         </div>
       </div>
-    \`;
+    `;
 
     const dropZone = document.getElementById('rn-drop-zone');
     dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--gold)'; });

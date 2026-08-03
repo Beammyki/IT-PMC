@@ -45,17 +45,17 @@ const CsvMerger = (() => {
     fileList.forEach((file, idx) => {
       const item = document.createElement('div');
       item.style.cssText = 'display:flex; justify-content:space-between; padding:8px 12px; background:rgba(255,255,255,0.02); border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; align-items:center;';
-      item.innerHTML = \`
-        <div>\${file.name}</div>
+      item.innerHTML = `
+        <div>${escapeHtml(file.name)}</div>
         <div style="color:var(--text-2); display:flex; align-items:center; gap:12px;">
-          <span>\${fmt(file.size)}</span>
-          <button class="btn btn--ghost" style="padding:2px 6px; font-size:11px;" onclick="CsvMerger.removeFile(\${idx})">ลบ</button>
+          <span>${fmt(file.size)}</span>
+          <button class="btn btn--ghost" style="padding:2px 6px; font-size:11px;" onclick="CsvMerger.removeFile(${idx})">ลบ</button>
         </div>
-      \`;
+      `;
       listEl.appendChild(item);
     });
     
-    document.getElementById('cm-info').textContent = \`รายการไฟล์ (\${fileList.length})\`;
+    document.getElementById('cm-info').textContent = `รายการไฟล์ (${fileList.length})`;
     
     if (mode === 'merge') {
       document.getElementById('cm-btn-process').disabled = fileList.length < 2;
@@ -76,8 +76,8 @@ const CsvMerger = (() => {
 
   function switchMode(newMode) {
     mode = newMode;
-    document.getElementById('cm-btn-mode-merge').className = \`btn \${mode === 'merge' ? 'btn--primary' : 'btn--ghost'}\`;
-    document.getElementById('cm-btn-mode-split').className = \`btn \${mode === 'split' ? 'btn--primary' : 'btn--ghost'}\`;
+    document.getElementById('cm-btn-mode-merge').className = `btn ${mode === 'merge' ? 'btn--primary' : 'btn--ghost'}`;
+    document.getElementById('cm-btn-mode-split').className = `btn ${mode === 'split' ? 'btn--primary' : 'btn--ghost'}`;
     
     document.getElementById('cm-opt-merge').style.display = mode === 'merge' ? 'block' : 'none';
     document.getElementById('cm-opt-split').style.display = mode === 'split' ? 'block' : 'none';
@@ -127,7 +127,7 @@ const CsvMerger = (() => {
     let allHeaders = new Set();
     
     for (let i = 0; i < fileList.length; i++) {
-      setStatus(\`กำลังอ่านไฟล์ที่ \${i+1}/\${fileList.length}...\`);
+      setStatus(`กำลังอ่านไฟล์ที่ ${i+1}/${fileList.length}...`);
       const results = await parseCsvFile(fileList[i]);
       results.meta.fields.forEach(f => allHeaders.add(f));
       
@@ -145,7 +145,7 @@ const CsvMerger = (() => {
     const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvStr], { type: 'text/csv;charset=utf-8;' }); // Add BOM for Excel Thai support
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = \`Merged_Data_\${Date.now()}.csv\`;
+    a.download = `Merged_Data_${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
     
@@ -170,7 +170,7 @@ const CsvMerger = (() => {
         const chunk = data.slice(i, i + rowsPerFile);
         const csvStr = Papa.unparse(chunk);
         const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvStr], { type: 'text/csv;charset=utf-8;' });
-        zip.file(\`part_\${(i/rowsPerFile)+1}.csv\`, blob);
+        zip.file(`part_${(i/rowsPerFile)+1}.csv`, blob);
         fileCount++;
       }
     } else {
@@ -179,7 +179,7 @@ const CsvMerger = (() => {
       const colName = document.getElementById('cm-split-col').value || results.meta.fields[0];
       
       if (!results.meta.fields.includes(colName)) {
-        throw new Error(\`ไม่พบคอลัมน์ชื่อ "\${colName}"\`);
+        throw new Error(`ไม่พบคอลัมน์ชื่อ "${colName}"`);
       }
       
       const groups = {};
@@ -193,20 +193,20 @@ const CsvMerger = (() => {
         const csvStr = Papa.unparse(rows);
         const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvStr], { type: 'text/csv;charset=utf-8;' });
         const safeName = String(key).replace(/[^a-zA-Z0-9ก-ฮ]/g, '_');
-        zip.file(\`group_\${safeName}.csv\`, blob);
+        zip.file(`group_${safeName}.csv`, blob);
         fileCount++;
       }
     }
     
-    setStatus(\`กำลังแพ็คไฟล์ ZIP (\${fileCount} ไฟล์)...\`);
+    setStatus(`กำลังแพ็คไฟล์ ZIP (${fileCount} ไฟล์)...`);
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(zipBlob);
-    a.download = \`Split_Data_\${Date.now()}.zip\`;
+    a.download = `Split_Data_${Date.now()}.zip`;
     a.click();
     URL.revokeObjectURL(a.href);
     
-    setStatus(\`หั่นไฟล์สำเร็จ (\${fileCount} ไฟล์)\`);
+    setStatus(`หั่นไฟล์สำเร็จ (${fileCount} ไฟล์)`);
   }
 
   function updateSplitUi() {
@@ -223,7 +223,7 @@ const CsvMerger = (() => {
   }
 
   function renderPage() {
-    document.getElementById('page-container').innerHTML = \`
+    document.getElementById('page-container').innerHTML = `
       <div class="page">
         <div class="page-header">
           <span class="page-eyebrow">Data Tools</span>
@@ -303,7 +303,7 @@ const CsvMerger = (() => {
           </div>
         </div>
       </div>
-    \`;
+    `;
 
     const dropZone = document.getElementById('cm-drop-zone');
     dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--gold)'; });

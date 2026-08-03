@@ -66,7 +66,7 @@ const CompressPdf = (() => {
       div.style.animationDelay = (i * 0.04) + 's';
       div.innerHTML = `
         <span class="pdf-tag">${tag}</span>
-        <span class="file-name" title="${item.file.name}">${item.file.name}</span>
+        <span class="file-name" title="${escapeHtml(item.file.name)}">${escapeHtml(item.file.name)}</span>
         <span class="file-size">${fmt(item.file.size)}</span>
         ${icon}
         <button class="file-remove" onclick="CompressPdf.removeFile(${i})">×</button>
