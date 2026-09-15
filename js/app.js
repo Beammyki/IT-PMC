@@ -29,7 +29,7 @@ const ICONS = Object.freeze({
 });
 
 const TOOL_DATA = [
-  { id:'pdf', group:'PDF Tools', title:'PDF Batch Print', thai:'พิมพ์ PDF หลายไฟล์', desc:'เลือกและพิมพ์เอกสาร PDF หลายไฟล์พร้อมกัน', icon:'print', tone:'blue', badge:'LIVE' },
+  { id:'pdf', group:'PDF Tools', title:'PDF Batch Print', thai:'พิมพ์ PDF หลายไฟล์', desc:'เลือกและพิมพ์เอกสาร PDF หลายไฟล์พร้อมกัน', icon:'print', tone:'blue', badge:'LIVE', image:'images/Printer.png' },
   { id:'merge', group:'PDF Tools', title:'Merge PDF', thai:'รวมไฟล์ PDF', desc:'รวมไฟล์ PDF หลายรายการเป็นเอกสารเดียว', icon:'merge', tone:'red', badge:'LIVE' },
   { id:'split', group:'PDF Tools', title:'Split & Organize', thai:'แยกและจัดหน้า PDF', desc:'แยก ลบ หรือจัดลำดับหน้าเอกสารใหม่', icon:'split', tone:'orange', badge:'NEW' },
   { id:'pagenum', group:'PDF Tools', title:'Add Page Numbers', thai:'เพิ่มเลขหน้า', desc:'ใส่เลขหน้าอัตโนมัติลงในเอกสาร PDF', icon:'page', tone:'violet', badge:'NEW' },
@@ -91,6 +91,9 @@ let currentPage = null;
 let selectedSearchIndex = -1;
 
 function iconSvg(tool, className = '') {
+  if (tool.image) {
+    return `<img class="tool-custom-icon ${className}" src="${tool.image}" alt="${tool.title}" />`;
+  }
   return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[tool.icon]}"/></svg>`;
 }
 
@@ -178,7 +181,7 @@ function renderToolCard(tool) {
     <article class="tool-card tool-card--${tool.tone}">
       <button class="favorite-button${favorite ? ' is-favorite' : ''}" type="button" data-favorite-id="${tool.id}" aria-label="${favorite ? 'นำออกจาก' : 'เพิ่มใน'}รายการโปรด: ${tool.title}" aria-pressed="${favorite}">★</button>
       <a class="tool-card-link" ${attributes}>
-        <span class="card-icon">${iconSvg(tool)}</span>
+        <span class="card-icon${tool.image ? ' card-icon--image' : ''}">${iconSvg(tool)}</span>
         <span class="card-copy"><strong class="card-title">${tool.title}</strong><small class="card-desc">${tool.thai}</small></span>
         ${tool.badge ? `<span class="card-badge card-badge--${tool.badge.toLowerCase()}">${tool.badge}</span>` : '<span class="external-card-icon">↗</span>'}
         <span class="card-arrow" aria-hidden="true">→</span>
@@ -218,10 +221,7 @@ function renderHome() {
           </div>
         </div>
         <div class="hero-illustration" aria-hidden="true">
-          <span class="orbit-dot orbit-dot--one"></span><span class="orbit-dot orbit-dot--two"></span><span class="orbit-dot orbit-dot--three"></span>
-          <div class="file-sheet"><span></span><span></span><b>PDF</b></div>
-          <div class="folder"><div class="folder-tab"></div><div class="folder-front"></div></div>
-          <span class="floating-file floating-file--image">◇</span><span class="floating-file floating-file--data">▥</span><span class="floating-file floating-file--lock">⌑</span>
+          <img src="images/banner%201.png" alt="จัดการไฟล์ ให้เป็นเรื่องง่าย" class="hero-cat-img" />
         </div>
       </section>
       <div class="dashboard-sections">
@@ -250,7 +250,14 @@ function renderUtilityPanel() {
   const usage = readStore(STORAGE_KEYS.usage, {});
   const frequent = Object.entries(usage).filter(([id, count]) => TOOL_MAP.has(id) && Number(count) > 0).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const empty = text => `<div class="empty-state"><span>◇</span><p>${text}</p></div>`;
-  document.getElementById('favorites-list').innerHTML = favorites.length ? favorites.map(tool => utilityItem(tool)).join('') : empty('ยังไม่มีรายการโปรด');
+  const renderEmptyFav = () => `
+    <div class="fav-empty-state">
+      <img src="images/star-empty.png" onerror="this.onerror=null;this.src='images/%E0%B9%80%E0%B9%80%E0%B8%88%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%95%E0%B8%B7%E0%B8%AD%E0%B8%99.png';" alt="ยังไม่มีรายการโปรด" class="fav-empty-img" />
+      <h3 class="fav-empty-title">ยังไม่มีรายการโปรด</h3>
+      <p class="fav-empty-desc">ลองเพิ่มเครื่องมือที่คุณชอบ<br/>เพื่อเข้าได้สะดวกยิ่งขึ้น! 💖</p>
+    </div>
+  `;
+  document.getElementById('favorites-list').innerHTML = favorites.length ? favorites.map(tool => utilityItem(tool)).join('') : renderEmptyFav();
   document.getElementById('recent-list').innerHTML = recent.length ? recent.map(item => utilityItem(item.tool, formatRelativeTime(item.timestamp))).join('') : empty('ยังไม่มีประวัติการใช้งาน');
   document.getElementById('frequent-list').innerHTML = frequent.length ? frequent.map(([id, count]) => utilityItem(TOOL_MAP.get(id), `เปิดใช้งาน ${count} ครั้ง`)).join('') : empty('ยังไม่มีเครื่องมือที่ใช้บ่อย');
   document.getElementById('clear-recent').disabled = !recent.length;

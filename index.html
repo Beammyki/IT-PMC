@@ -82,7 +82,7 @@
 
         <div class="nav-section">
           <span class="nav-label">PDF TOOLS</span>
-          <a class="nav-item" href="#pdf" data-page="pdf" title="PDF Batch Print"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M6 9V3h9l3 3v3M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg></span><span class="nav-text">PDF Batch Print</span><span class="nav-live">LIVE</span></a>
+          <a class="nav-item" href="#pdf" data-page="pdf" title="PDF Batch Print"><span class="nav-icon"><img class="tool-custom-icon" src="images/Printer.png" alt="PDF Batch Print" /></span><span class="nav-text">PDF Batch Print</span><span class="nav-live">LIVE</span></a>
           <a class="nav-item" href="#merge" data-page="merge" title="Merge PDF"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h10M5 17h6"/></svg></span><span class="nav-text">Merge PDF</span><span class="nav-live">LIVE</span></a>
           <a class="nav-item" href="#split" data-page="split" title="Split & Organize"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M7 3v18M17 3v18M3 8h8M13 16h8"/></svg></span><span class="nav-text">Split & Organize</span><span class="nav-live nav-live--new">NEW</span></a>
           <a class="nav-item" href="#pagenum" data-page="pagenum" title="Add Page Numbers"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M5 3h12v18H5zM14 17h5V7"/></svg></span><span class="nav-text">Add Page Numbers</span><span class="nav-live nav-live--new">NEW</span></a>
@@ -149,7 +149,7 @@
         </div>
         <div class="profile-wrap">
           <button class="profile-button" id="profile-button" type="button" aria-haspopup="menu" aria-expanded="false">
-            <span class="avatar">B</span><span class="profile-copy"><strong>Beam</strong><small>Administrator</small></span>
+            <img class="avatar" src="images/profile.png" onerror="this.onerror=null;this.src='images/profille.png';" alt="Beam" /><span class="profile-copy"><strong>Beam</strong><small>Administrator</small></span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
           </button>
           <div class="profile-menu" id="profile-menu" role="menu" hidden>
@@ -162,8 +162,21 @@
     </main>
 
     <aside class="utility-panel" id="utility-panel" aria-label="แผงข้อมูลการใช้งาน">
-      <section class="utility-card">
-        <div class="utility-heading"><h2><span class="utility-heading-icon utility-heading-icon--amber">☆</span>รายการโปรด</h2></div>
+      <section class="utility-card utility-card--fav">
+        <div class="utility-heading utility-heading--fav">
+          <div class="fav-header-icon-group">
+            <svg class="fav-header-star" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2.5C12.3 2.5 12.6 2.7 12.8 3L15.3 7.8C15.5 8.2 15.9 8.5 16.3 8.6L21.7 9.4C22.3 9.5 22.6 10.3 22.1 10.7L18.2 14.5C17.9 14.8 17.8 15.3 17.8 15.7L18.7 21C18.8 21.7 18.2 22.2 17.6 21.8L12.7 19.3C12.3 19.1 11.7 19.1 11.3 19.3L6.4 21.8C5.8 22.2 5.2 21.7 5.3 21L6.2 15.7C6.2 15.3 6.1 14.8 5.8 14.5L1.9 10.7C1.4 10.3 1.7 9.5 2.3 9.4L7.7 8.6C8.1 8.5 8.5 8.2 8.7 7.8L11.2 3C11.4 2.7 11.7 2.5 12 2.5Z" fill="#FBBF24" stroke="#F59E0B" stroke-width="1.2" stroke-linejoin="round"/>
+            </svg>
+            <svg class="fav-header-wave" viewBox="0 0 20 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 3C3 1 5 5 7 3C9 1 11 5 13 3C15 1 17 5 19 3" stroke="#818CF8" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="fav-header-titles">
+            <h2>รายการโปรด</h2>
+            <p>เครื่องมือที่คุณใช้บ่อย</p>
+          </div>
+        </div>
         <div class="utility-list" id="favorites-list"></div>
       </section>
       <section class="utility-card">
