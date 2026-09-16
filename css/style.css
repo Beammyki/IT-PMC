@@ -52,12 +52,12 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 :focus-visible { outline: 3px solid rgba(91, 109, 246, 0.28); outline-offset: 2px; }
 
 /* Login */
-.login-screen { position: relative; display: grid; place-items: center; min-height: 100vh; padding: 24px; overflow: hidden; background: radial-gradient(circle at 15% 15%, #f1efff 0, transparent 30%), radial-gradient(circle at 85% 80%, #e8f3ff 0, transparent 32%), #f8faff; }
-.login-screen::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .45; background-image: linear-gradient(rgba(91,109,246,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(91,109,246,.035) 1px, transparent 1px); background-size: 36px 36px; }
-.login-decoration { position: absolute; border-radius: 999px; filter: blur(2px); opacity: .65; }
+.login-screen { position: relative; display: grid; place-items: center; min-height: 100vh; padding: 24px; overflow: hidden; background: linear-gradient(135deg, rgba(248,250,255,.58) 0%, rgba(248,250,255,.38) 48%, rgba(238,242,255,.54) 100%), url('../images/backgroud.png') center center / cover no-repeat; }
+.login-screen::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .22; background-image: linear-gradient(rgba(91,109,246,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(91,109,246,.045) 1px, transparent 1px); background-size: 36px 36px; }
+.login-decoration { position: absolute; border-radius: 999px; filter: blur(2px); opacity: .38; }
 .login-decoration--one { width: 290px; height: 290px; top: -130px; right: 10%; background: linear-gradient(135deg, #d8e4ff, #ece8ff); }
 .login-decoration--two { width: 210px; height: 210px; bottom: -95px; left: 8%; background: linear-gradient(135deg, #dff7ff, #e8ecff); }
-.login-card { position: relative; z-index: 1; width: min(100%, 440px); padding: 38px; border: 1px solid rgba(216, 222, 236, .9); border-radius: 24px; background: rgba(255,255,255,.94); box-shadow: 0 28px 80px rgba(47, 65, 118, .14); backdrop-filter: blur(18px); }
+.login-card { position: relative; z-index: 1; width: min(100%, 440px); padding: 38px; border: 1px solid rgba(216, 222, 236, .82); border-radius: 24px; background: rgba(255,255,255,.88); box-shadow: 0 28px 80px rgba(47, 65, 118, .18), 0 6px 18px rgba(99, 102, 241, .08); backdrop-filter: blur(20px) saturate(1.08); }
 .brand { display: flex; align-items: center; min-width: 0; gap: 12px; }
 .brand--login { justify-content: center; margin-bottom: 14px; }
 
@@ -110,6 +110,18 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .cat-mascot.is-success .cat-mouth-normal { opacity: 0; }
 .cat-mascot.is-success .cat-mouth-peek { opacity: 1; }
 .cat-mascot.is-success .cat-sparkle { opacity: 1; transform: scale(1); }
+
+/* Generated layered cat assets */
+.cat-svg { display: none; }
+.cat-illustration { position: relative; z-index: 1; width: 100%; height: 100%; overflow: visible; }
+.cat-layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; }
+.cat-sparkle { z-index: 1; opacity: 0; transform: scale(.7); transform-origin: center center; transition: opacity .35s ease, transform .4s cubic-bezier(.34, 1.56, .64, 1); }
+.cat-body-asset { z-index: 2; transform: translateY(7px) scale(.94); transform-origin: center bottom; }
+.cat-head-asset { z-index: 3; transform: translateY(-24px) scale(.86); transform-origin: center bottom; }
+.cat-sweat { z-index: 4; opacity: 0; transform: scale(0); transform-origin: 82% 45%; transition: opacity .2s ease, transform .3s cubic-bezier(.34, 1.56, .64, 1); }
+
+.cat-mascot.is-wrong .cat-sweat { opacity: 1; transform: scale(1); }
+.cat-mascot.is-success .cat-sparkle { opacity: 1; transform: scale(.9); }
 .brand-mark { position: relative; display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 12px; color: #fff; background: var(--primary-gradient); box-shadow: 0 8px 18px rgba(91, 109, 246, .28); }
 .brand-mark::before { content: ''; position: absolute; width: 21px; height: 5px; top: 12px; border-radius: 99px; background: #fff; }
 .brand-mark span { position: absolute; width: 5px; height: 20px; top: 13px; border-radius: 99px; background: #fff; }
