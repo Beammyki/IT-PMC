@@ -29,32 +29,32 @@ const ICONS = Object.freeze({
 });
 
 const TOOL_DATA = [
-  { id:'pdf', group:'PDF Tools', title:'PDF Batch Print', thai:'พิมพ์ PDF หลายไฟล์', desc:'เลือกและพิมพ์เอกสาร PDF หลายไฟล์พร้อมกัน', icon:'print', tone:'blue', badge:'LIVE', image:'images/Printer.png' },
-  { id:'merge', group:'PDF Tools', title:'Merge PDF', thai:'รวมไฟล์ PDF', desc:'รวมไฟล์ PDF หลายรายการเป็นเอกสารเดียว', icon:'merge', tone:'red', badge:'LIVE' },
-  { id:'split', group:'PDF Tools', title:'Split & Organize', thai:'แยกและจัดหน้า PDF', desc:'แยก ลบ หรือจัดลำดับหน้าเอกสารใหม่', icon:'split', tone:'orange', badge:'NEW' },
-  { id:'pagenum', group:'PDF Tools', title:'Add Page Numbers', thai:'เพิ่มเลขหน้า', desc:'ใส่เลขหน้าอัตโนมัติลงในเอกสาร PDF', icon:'page', tone:'violet', badge:'NEW' },
-  { id:'extract', group:'PDF Tools', title:'Extract Images', thai:'ดึงรูปภาพจาก PDF', desc:'แยกรูปภาพทั้งหมดออกจากไฟล์ PDF', icon:'extract', tone:'green', badge:'NEW' },
-  { id:'mailmerge', group:'PDF Tools', title:'PDF Mail Merge', thai:'สร้างเอกสารหลายชุด', desc:'สร้างเอกสารจากข้อมูล CSV แบบอัตโนมัติ', icon:'mail', tone:'pink', badge:'NEW' },
-  { id:'watermark', group:'PDF Tools', title:'Remove Watermark', thai:'ลบลายน้ำ', desc:'ลบโลโก้หรือลายน้ำออกจากเอกสาร', icon:'remove', tone:'red', badge:'LIVE' },
-  { id:'add-wm', group:'PDF Tools', title:'Add Watermark', thai:'เพิ่มลายน้ำ', desc:'ประทับข้อความหรือลายน้ำลงใน PDF', icon:'add', tone:'pink', badge:'NEW' },
-  { id:'redactor', group:'PDF Tools', title:'Document Redactor', thai:'ปกปิดข้อมูลเอกสาร', desc:'ปกปิดข้อมูลสำคัญก่อนส่งต่อไฟล์', icon:'redact', tone:'slate', badge:'NEW' },
-  { id:'compress', group:'PDF Tools', title:'Compress PDF & Image', thai:'บีบอัด PDF และรูปภาพ', desc:'ลดขนาดไฟล์ PDF และรูปภาพให้เล็กลง', icon:'compress', tone:'green', badge:'LIVE' },
-  { id:'convert', group:'PDF Tools', title:'Convert Files', thai:'แปลงไฟล์', desc:'แปลงเอกสาร PDF, Word และรูปภาพ', icon:'convert', tone:'blue', badge:'LIVE' },
-  { id:'lock', group:'PDF Tools', title:'PDF Lock', thai:'ล็อกไฟล์ PDF', desc:'เพิ่มรหัสผ่านให้เอกสารหลายไฟล์', icon:'lock', tone:'orange', badge:'LIVE' },
-  { id:'unlock', group:'PDF Tools', title:'PDF Unlock', thai:'ปลดล็อกไฟล์ PDF', desc:'นำรหัสผ่านออกจากเอกสาร PDF', icon:'unlock', tone:'green', badge:'LIVE' },
-  { id:'schedprint', group:'General Tools', title:'Scheduled Print', thai:'ตั้งเวลาพิมพ์เอกสาร', desc:'กำหนดเวลา รอบ และจำนวนสำเนาที่ต้องการพิมพ์', icon:'clock', tone:'violet', badge:'LIVE' },
-  { id:'ocr', group:'Image Tools', title:'Image to Text (OCR)', thai:'แปลงรูปเป็นข้อความ', desc:'อ่านข้อความไทยและอังกฤษจากรูปภาพ', icon:'ocr', tone:'blue', badge:'NEW' },
-  { id:'resizer', group:'Image Tools', title:'Bulk Resizer', thai:'ย่อรูปภาพหลายไฟล์', desc:'ปรับขนาดและแปลงชนิดรูปภาพพร้อมกัน', icon:'resize', tone:'teal', badge:'NEW' },
-  { id:'collage', group:'Image Tools', title:'Slip Collage', thai:'จัดเรียงสลิป', desc:'จัดรูปภาพหรือสลิปลงกระดาษ A4 อัตโนมัติ', icon:'collage', tone:'orange', badge:'NEW' },
-  { id:'qr', group:'Data Tools', title:'Batch QR Code', thai:'สร้าง QR Code หลายรายการ', desc:'สร้าง QR Code จากลิงก์หรือข้อความพร้อมกัน', icon:'qr', tone:'violet', badge:'NEW' },
-  { id:'cleaner', group:'Data Tools', title:'Data Cleaner', thai:'ทำความสะอาดข้อมูล', desc:'ลบข้อมูลซ้ำและจัดรูปแบบรายการข้อความ', icon:'cleaner', tone:'green', badge:'NEW' },
-  { id:'renamer', group:'Data Tools', title:'Batch Renamer', thai:'เปลี่ยนชื่อไฟล์หลายรายการ', desc:'ตั้งชื่อไฟล์ใหม่ตามรูปแบบที่กำหนด', icon:'rename', tone:'blue', badge:'NEW' },
-  { id:'csv', group:'Data Tools', title:'CSV Merger/Splitter', thai:'รวมและแบ่งไฟล์ CSV', desc:'จัดการไฟล์ CSV หลายไฟล์ในครั้งเดียว', icon:'csv', tone:'teal', badge:'NEW' },
-  { id:'cert', group:'HR / Office', title:'Certificate', thai:'ระบบออกใบรับรอง', desc:'เปิดระบบออกใบรับรองพนักงาน', icon:'cert', tone:'orange', url:'https://hr-certificate.pages.dev/' },
-  { id:'meeting', group:'HR / Office', title:'จองห้องประชุม', thai:'Meeting Room Booking', desc:'เปิดระบบจองห้องประชุมออนไลน์', icon:'meeting', tone:'blue', url:'https://script.google.com/macros/s/AKfycbzN7DJXgZyuFlz12GjAJjcDVe15B6fNAG7aLszXeyIBvWwD6AdzZlZUPPmcZ3StF5s/exec' },
-  { id:'excel', group:'Admin', title:'Excel Admin', thai:'ระบบจัดการ Excel', desc:'เปิดระบบจัดการข้อมูล Excel', icon:'table', tone:'green', url:'https://script.google.com/macros/s/AKfycbzM47RYLjJBJ0a7QLcT-InU2NOtC7eS_gBFJFabXdmrBWYfV3GZ7osqz1yrJiR8D0xC/exec' },
-  { id:'excel-pgsn', group:'Admin', title:'Excel Admin PGSN', thai:'ระบบจัดการ Excel PGSN', desc:'เปิดระบบจัดการข้อมูล Excel PGSN', icon:'table', tone:'teal', url:'https://script.google.com/macros/s/AKfycbxufah9Ub9ul7khRX3iaJSlVZtjD5Z6wPL6Mdy-iV-iCWsO6UaVxA7QLFtxXz_2WkT5/exec' },
-  { id:'express', group:'Admin', title:'Express Admin', thai:'ระบบจัดการ Express', desc:'เปิดระบบจัดการ Express', icon:'admin', tone:'red', url:'https://4439ab01.pegasus-stock.pages.dev/' }
+  { id:'pdf', group:'PDF Tools', title:'PDF Batch Print', thai:'พิมพ์ PDF หลายไฟล์', desc:'เลือกและพิมพ์เอกสาร PDF หลายไฟล์พร้อมกัน', icon:'print', tone:'cyan', badge:'LIVE', image:'images/Printer.png' },
+  { id:'merge', group:'PDF Tools', title:'Merge PDF', thai:'รวมไฟล์ PDF', desc:'รวมไฟล์ PDF หลายรายการเป็นเอกสารเดียว', icon:'merge', tone:'pink', badge:'LIVE', image:'images/MERGE PDF.png' },
+  { id:'split', group:'PDF Tools', title:'Split & Organize', thai:'แยกและจัดหน้า PDF', desc:'แยก ลบ หรือจัดลำดับหน้าเอกสารใหม่', icon:'split', tone:'orange', badge:'NEW', image:'images/SPLIT & ORGANIZE.png' },
+  { id:'pagenum', group:'PDF Tools', title:'Add Page Numbers', thai:'เพิ่มเลขหน้า', desc:'ใส่เลขหน้าอัตโนมัติลงในเอกสาร PDF', icon:'page', tone:'blue', badge:'NEW', image:'images/ADD PAGE NUMBERS.png' },
+  { id:'extract', group:'PDF Tools', title:'Extract Images', thai:'ดึงรูปภาพจาก PDF', desc:'แยกรูปภาพทั้งหมดออกจากไฟล์ PDF', icon:'extract', tone:'teal', badge:'NEW', image:'images/EXTRACT IMAGES.png' },
+  { id:'mailmerge', group:'PDF Tools', title:'PDF Mail Merge', thai:'สร้างเอกสารหลายชุด', desc:'สร้างเอกสารจากข้อมูล CSV แบบอัตโนมัติ', icon:'mail', tone:'red', badge:'NEW', image:'images/PDF MAIL MERGE.png' },
+  { id:'watermark', group:'PDF Tools', title:'Remove Watermark', thai:'ลบลายน้ำ', desc:'ลบโลโก้หรือลายน้ำออกจากเอกสาร', icon:'remove', tone:'amber', badge:'LIVE', image:'images/REMOVE WATERMARK.png' },
+  { id:'add-wm', group:'PDF Tools', title:'Add Watermark', thai:'เพิ่มลายน้ำ', desc:'ประทับข้อความหรือลายน้ำลงใน PDF', icon:'add', tone:'green', badge:'NEW', image:'images/ADD WATERMARK.png' },
+  { id:'redactor', group:'PDF Tools', title:'Document Redactor', thai:'ปกปิดข้อมูลเอกสาร', desc:'ปกปิดข้อมูลสำคัญก่อนส่งต่อไฟล์', icon:'redact', tone:'slate', badge:'NEW', image:'images/DOCUMENT REDACTOR.png' },
+  { id:'compress', group:'PDF Tools', title:'Compress PDF & Image', thai:'บีบอัด PDF และรูปภาพ', desc:'ลดขนาดไฟล์ PDF และรูปภาพให้เล็กลง', icon:'compress', tone:'teal', badge:'LIVE', image:'images/COMPRESS PDF & IMAGE 2.png' },
+  { id:'convert', group:'PDF Tools', title:'Convert Files', thai:'แปลงไฟล์', desc:'แปลงเอกสาร PDF, Word และรูปภาพ', icon:'convert', tone:'purple', badge:'LIVE', image:'images/CONVERT FILES.png' },
+  { id:'lock', group:'PDF Tools', title:'PDF Lock', thai:'ล็อกไฟล์ PDF', desc:'เพิ่มรหัสผ่านให้เอกสารหลายไฟล์', icon:'lock', tone:'orange', badge:'LIVE', image:'images/PDF LOCK.png' },
+  { id:'unlock', group:'PDF Tools', title:'PDF Unlock', thai:'ปลดล็อกไฟล์ PDF', desc:'นำรหัสผ่านออกจากเอกสาร PDF', icon:'unlock', tone:'pink', badge:'LIVE', image:'images/PDF UNLOCK.png' },
+  { id:'schedprint', group:'General Tools', title:'Scheduled Print', thai:'ตั้งเวลาพิมพ์เอกสาร', desc:'กำหนดเวลา รอบ และจำนวนสำเนาที่ต้องการพิมพ์', icon:'clock', tone:'purple', badge:'LIVE', image:'images/SCHEDULED PRINT.png' },
+  { id:'ocr', group:'Image Tools', title:'Image to Text (OCR)', thai:'แปลงรูปเป็นข้อความ', desc:'อ่านข้อความไทยและอังกฤษจากรูปภาพ', icon:'ocr', tone:'blue', badge:'NEW', image:'images/IMAGE TO TEXT (OCR).png' },
+  { id:'resizer', group:'Image Tools', title:'Bulk Resizer', thai:'ย่อรูปภาพหลายไฟล์', desc:'ปรับขนาดและแปลงชนิดรูปภาพพร้อมกัน', icon:'resize', tone:'teal', badge:'NEW', image:'images/BULK RESIZER.png' },
+  { id:'collage', group:'Image Tools', title:'Slip Collage', thai:'จัดเรียงสลิป', desc:'จัดรูปภาพหรือสลิปลงกระดาษ A4 อัตโนมัติ', icon:'collage', tone:'orange', badge:'NEW', image:'images/SLIP COLLAGE.png' },
+  { id:'qr', group:'Data Tools', title:'Batch QR Code', thai:'สร้าง QR Code หลายรายการ', desc:'สร้าง QR Code จากลิงก์หรือข้อความพร้อมกัน', icon:'qr', tone:'violet', badge:'NEW', image:'images/BATCH QR CODE.png' },
+  { id:'cleaner', group:'Data Tools', title:'Data Cleaner', thai:'ทำความสะอาดข้อมูล', desc:'ลบข้อมูลซ้ำและจัดรูปแบบรายการข้อความ', icon:'cleaner', tone:'green', badge:'NEW', image:'images/DATA CLEANER.png' },
+  { id:'renamer', group:'Data Tools', title:'Batch Renamer', thai:'เปลี่ยนชื่อไฟล์หลายรายการ', desc:'ตั้งชื่อไฟล์ใหม่ตามรูปแบบที่กำหนด', icon:'rename', tone:'cyan', badge:'NEW', image:'images/BATCH RENAMER.png' },
+  { id:'csv', group:'Data Tools', title:'CSV Merger/Splitter', thai:'รวมและแบ่งไฟล์ CSV', desc:'จัดการไฟล์ CSV หลายไฟล์ในครั้งเดียว', icon:'csv', tone:'amber', badge:'NEW', image:'images/CSV MERGER SPLITTER.png' },
+  { id:'cert', group:'HR / Office', title:'Certificate', thai:'ระบบออกใบรับรอง', desc:'เปิดระบบออกใบรับรองพนักงาน', icon:'cert', tone:'orange', url:'https://hr-certificate.pages.dev/', image:'images/CERTIFICATE.png' },
+  { id:'meeting', group:'HR / Office', title:'จองห้องประชุม', thai:'Meeting Room Booking', desc:'เปิดระบบจองห้องประชุมออนไลน์', icon:'meeting', tone:'blue', url:'https://script.google.com/macros/s/AKfycbzN7DJXgZyuFlz12GjAJjcDVe15B6fNAG7aLszXeyIBvWwD6AdzZlZUPPmcZ3StF5s/exec', image:'images/MEETING ROOM.png' },
+  { id:'excel', group:'Admin', title:'Excel Admin', thai:'ระบบจัดการ Excel', desc:'เปิดระบบจัดการข้อมูล Excel', icon:'table', tone:'green', url:'https://script.google.com/macros/s/AKfycbzM47RYLjJBJ0a7QLcT-InU2NOtC7eS_gBFJFabXdmrBWYfV3GZ7osqz1yrJiR8D0xC/exec', image:'images/EXCEL ADMIN.png' },
+  { id:'excel-pgsn', group:'Admin', title:'Excel Admin PGSN', thai:'ระบบจัดการ Excel PGSN', desc:'เปิดระบบจัดการข้อมูล Excel PGSN', icon:'table', tone:'teal', url:'https://script.google.com/macros/s/AKfycbxufah9Ub9ul7khRX3iaJSlVZtjD5Z6wPL6Mdy-iV-iCWsO6UaVxA7QLFtxXz_2WkT5/exec', image:'images/EXCEL ADMIN PGSN.png' },
+  { id:'express', group:'Admin', title:'Express Admin', thai:'ระบบจัดการ Express', desc:'เปิดระบบจัดการ Express', icon:'admin', tone:'red', url:'https://4439ab01.pegasus-stock.pages.dev/', image:'images/EXPRESS ADMIN.png' }
 ];
 
 const TOOL_MAP = new Map(TOOL_DATA.map(tool => [tool.id, tool]));
@@ -181,7 +181,7 @@ function renderToolCard(tool) {
     <article class="tool-card tool-card--${tool.tone}">
       <button class="favorite-button${favorite ? ' is-favorite' : ''}" type="button" data-favorite-id="${tool.id}" aria-label="${favorite ? 'นำออกจาก' : 'เพิ่มใน'}รายการโปรด: ${tool.title}" aria-pressed="${favorite}">★</button>
       <a class="tool-card-link" ${attributes}>
-        <span class="card-icon${tool.image ? ' card-icon--image' : ''}">${iconSvg(tool)}</span>
+        <span class="card-icon${tool.image ? ' card-icon--image' : ''} card-icon--${tool.id}">${iconSvg(tool)}</span>
         <span class="card-copy"><strong class="card-title">${tool.title}</strong><small class="card-desc">${tool.thai}</small></span>
         ${tool.badge ? `<span class="card-badge card-badge--${tool.badge.toLowerCase()}">${tool.badge}</span>` : '<span class="external-card-icon">↗</span>'}
         <span class="card-arrow" aria-hidden="true">→</span>
@@ -215,7 +215,7 @@ function renderHome() {
             <div class="quick-action-menu" id="quick-action-menu" role="menu" hidden>
               ${['merge','pdf','compress','convert','ocr','qr'].map(id => {
                 const tool = TOOL_MAP.get(id);
-                return `<button type="button" role="menuitem" data-page="${id}"><span class="mini-icon mini-icon--${tool.tone}">${iconSvg(tool)}</span><span><strong>${tool.title}</strong><small>${tool.thai}</small></span></button>`;
+                return `<button type="button" role="menuitem" data-page="${id}"><span class="mini-icon mini-icon--${tool.tone}${tool.image ? ' mini-icon--image' : ''}">${iconSvg(tool)}</span><span><strong>${tool.title}</strong><small>${tool.thai}</small></span></button>`;
               }).join('')}
             </div>
           </div>
@@ -241,7 +241,7 @@ function utilityItem(tool, suffix = '') {
   const attrs = tool.url
     ? `href="${tool.url}" target="_blank" rel="noopener noreferrer" data-external-id="${tool.id}"`
     : `href="#${tool.id}" data-page="${tool.id}"`;
-  return `<a class="utility-item" ${attrs}><span class="mini-icon mini-icon--${tool.tone}">${iconSvg(tool)}</span><span><strong>${tool.title}</strong>${suffix ? `<small>${suffix}</small>` : `<small>${tool.thai}</small>`}</span><span class="utility-arrow">${tool.url ? '↗' : '›'}</span></a>`;
+  return `<a class="utility-item" ${attrs}><span class="mini-icon mini-icon--${tool.tone}${tool.image ? ' mini-icon--image' : ''}">${iconSvg(tool)}</span><span><strong>${tool.title}</strong>${suffix ? `<small>${suffix}</small>` : `<small>${tool.thai}</small>`}</span><span class="utility-arrow">${tool.url ? '↗' : '›'}</span></a>`;
 }
 
 function renderUtilityPanel() {
@@ -276,7 +276,7 @@ function renderSearchResults(query) {
   }
   const matches = TOOL_DATA.filter(tool => `${tool.title} ${tool.thai} ${tool.desc} ${tool.group}`.toLocaleLowerCase('th').includes(normalized));
   resultBox.innerHTML = matches.length
-    ? matches.map((tool, index) => `<a class="search-result" role="option" aria-selected="false" data-search-index="${index}" ${tool.url ? `href="${tool.url}" target="_blank" rel="noopener noreferrer" data-external-id="${tool.id}"` : `href="#${tool.id}" data-page="${tool.id}"`}><span class="mini-icon mini-icon--${tool.tone}">${iconSvg(tool)}</span><span><strong>${tool.title}</strong><small>${tool.thai} · ${tool.group}</small></span><span>${tool.url ? '↗' : '›'}</span></a>`).join('')
+    ? matches.map((tool, index) => `<a class="search-result" role="option" aria-selected="false" data-search-index="${index}" ${tool.url ? `href="${tool.url}" target="_blank" rel="noopener noreferrer" data-external-id="${tool.id}"` : `href="#${tool.id}" data-page="${tool.id}"`}><span class="mini-icon mini-icon--${tool.tone}${tool.image ? ' mini-icon--image' : ''}">${iconSvg(tool)}</span><span><strong>${tool.title}</strong><small>${tool.thai} · ${tool.group}</small></span><span>${tool.url ? '↗' : '›'}</span></a>`).join('')
     : '<div class="search-empty">ไม่พบเครื่องมือที่ค้นหา</div>';
   resultBox.hidden = false;
   input.setAttribute('aria-expanded', 'true');
