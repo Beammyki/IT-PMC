@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f6f8fc" />
+  <title>TOOLBOX — File Utilities</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://unpkg.com/docx-preview/dist/docx-preview.js"></script>
+  <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://unpkg.com/tesseract.js@4.1.2/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <section class="login-screen" id="login-screen" aria-labelledby="login-title">
+    <div class="login-decoration login-decoration--one"></div>
+    <div class="login-decoration login-decoration--two"></div>
+    <div class="login-card">
+      <div class="brand brand--login" aria-label="TOOLBOX File Utilities">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span class="brand-copy"><strong>TOOLBOX</strong><small>FILE UTILITIES</small></span>
+      </div>
+      <div class="cat-mascot-wrap" aria-hidden="true">
+        <div class="cat-mascot" id="login-cat-mascot">
+          <svg class="cat-svg" viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="catFaceGrad" x1="35" y1="24" x2="125" y2="112" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#ffffff"/>
+                <stop offset="1" stop-color="#f8f7ff"/>
+              </linearGradient>
+              <linearGradient id="catBodyGrad" x1="80" y1="94" x2="80" y2="120" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#ffffff"/>
+                <stop offset="1" stop-color="#f1efff"/>
+              </linearGradient>
+              <linearGradient id="catIrisGrad" x1="56" y1="55" x2="64" y2="69" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#a78bfa"/>
+                <stop offset="1" stop-color="#6366f1"/>
+              </linearGradient>
+              <radialGradient id="catBlushGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#fb7185" stop-opacity="0.72"/>
+                <stop offset="100%" stop-color="#fda4af" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+
+            <!-- Sparkles on success -->
+            <path class="cat-sparkle cat-sparkle--1" d="M 22 30 Q 24 20 27 30 Q 37 32 27 35 Q 24 45 22 35 Q 12 32 22 30 Z" fill="#fbbf24"/>
+            <path class="cat-sparkle cat-sparkle--2" d="M 138 25 Q 140 17 142 25 Q 150 27 142 29 Q 140 37 138 29 Q 130 27 138 25 Z" fill="#818cf8"/>
+
+            <!-- Ears -->
+            <path d="M 38 51 C 29 28 35 7 49 12 C 62 16 68 30 68 46 C 59 42 49 43 38 51 Z" fill="url(#catFaceGrad)" stroke="#334155" stroke-width="2.6" stroke-linejoin="round"/>
+            <path d="M 42 42 C 37 29 41 17 48 20 C 55 23 59 32 60 39 C 53 38 47 39 42 42 Z" fill="#f9a8d4"/>
+            <path d="M 122 51 C 131 28 125 7 111 12 C 98 16 92 30 92 46 C 101 42 111 43 122 51 Z" fill="url(#catFaceGrad)" stroke="#334155" stroke-width="2.6" stroke-linejoin="round"/>
+            <path d="M 118 42 C 123 29 119 17 112 20 C 105 23 101 32 100 39 C 107 38 113 39 118 42 Z" fill="#f9a8d4"/>
+
+            <!-- Body / Shoulder -->
+            <path d="M 44 102 C 60 96 100 96 116 102 C 124 105 132 120 132 120 L 28 120 C 28 120 36 105 44 102 Z" fill="url(#catBodyGrad)" stroke="#334155" stroke-width="2.6" stroke-linejoin="round"/>
+
+            <!-- Head -->
+            <ellipse cx="80" cy="68" rx="53" ry="44" fill="url(#catFaceGrad)" stroke="#334155" stroke-width="2.6"/>
+            <ellipse cx="61" cy="42" rx="17" ry="7" fill="#ffffff" opacity="0.7" transform="rotate(-18 61 42)"/>
+
+            <!-- Whiskers -->
+            <path d="M 30 68 L 18 65 M 30 73 L 16 75 M 30 78 L 20 82" stroke="#64748b" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M 130 68 L 142 65 M 130 73 L 144 75 M 130 78 L 140 82" stroke="#64748b" stroke-width="1.8" stroke-linecap="round"/>
+
+            <!-- Blushing Cheeks -->
+            <ellipse cx="48" cy="76" rx="11" ry="6" fill="url(#catBlushGrad)"/>
+            <ellipse cx="112" cy="76" rx="11" ry="6" fill="url(#catBlushGrad)"/>
+            <path d="M 43 76 l 3 1 M 48 74 l 3 1 M 107 77 l 3 -1 M 112 75 l 3 -1" stroke="#fb7185" stroke-width="1.4" stroke-linecap="round" opacity="0.68"/>
+
+            <!-- Sweat Drop on Error -->
+            <path class="cat-sweat" d="M 126 50 C 130 43 131 39 133 43 C 135 48 131 53 128 53 C 125 53 124 53 126 50 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1"/>
+
+            <!-- Eyes -->
+            <!-- Left Eye Open -->
+            <g class="cat-eye-open left-eye">
+              <ellipse cx="60" cy="63" rx="7.1" ry="8" fill="#1e293b"/>
+              <ellipse cx="60" cy="64" rx="4.2" ry="5.2" fill="url(#catIrisGrad)"/>
+              <circle cx="57.4" cy="60.1" r="2.3" fill="#ffffff"/>
+              <circle cx="63" cy="66" r="1.1" fill="#ffffff"/>
+            </g>
+            <!-- Left Eye Closed -->
+            <path class="cat-eye-closed left-eye" d="M 53 63 Q 60 56 67 63" fill="none" stroke="#1e293b" stroke-width="2.6" stroke-linecap="round"/>
+
+            <!-- Right Eye Open -->
+            <g class="cat-eye-open right-eye">
+              <ellipse cx="100" cy="63" rx="7.1" ry="8" fill="#1e293b"/>
+              <ellipse cx="100" cy="64" rx="4.2" ry="5.2" fill="url(#catIrisGrad)"/>
+              <circle cx="97.4" cy="60.1" r="2.3" fill="#ffffff"/>
+              <circle cx="103" cy="66" r="1.1" fill="#ffffff"/>
+            </g>
+            <!-- Right Eye Closed -->
+            <path class="cat-eye-closed right-eye" d="M 93 63 Q 100 56 107 63" fill="none" stroke="#1e293b" stroke-width="2.6" stroke-linecap="round"/>
+
+            <!-- Nose -->
+            <path d="M 76.5 71.5 Q 80 69 83.5 71.5 Q 80 75.5 76.5 71.5 Z" fill="#f472b6" stroke="#334155" stroke-width="1.2" stroke-linejoin="round"/>
+
+            <!-- Mouth Normal (:3 smile) -->
+            <path class="cat-mouth-normal" d="M 73.5 76 Q 76.8 80.5 80 76 Q 83.2 80.5 86.5 76" fill="none" stroke="#334155" stroke-width="2.2" stroke-linecap="round"/>
+            <!-- Mouth Peek / Open (cute 'o') -->
+            <path class="cat-mouth-peek" d="M 74.5 75 Q 80 85 85.5 75 Q 80 78 74.5 75 Z" fill="#ff8da1" stroke="#334155" stroke-width="2" stroke-linejoin="round"/>
+
+            <!-- Little bow tie -->
+            <path d="M 80 98 C 74 94 68 96 70 101 C 72 105 77 103 80 100 C 83 103 88 105 90 101 C 92 96 86 94 80 98 Z" fill="#c4b5fd" stroke="#6366f1" stroke-width="1.6" stroke-linejoin="round"/>
+            <circle cx="80" cy="100" r="2.3" fill="#fbbf24" stroke="#d97706" stroke-width="1"/>
+
+            <!-- Paws -->
+            <!-- Left Paw -->
+            <g class="cat-paw cat-paw--left">
+              <ellipse cx="50" cy="112" rx="16" ry="12" fill="url(#catFaceGrad)" stroke="#334155" stroke-width="2.6"/>
+              <ellipse cx="50" cy="113" rx="5.5" ry="4.2" fill="#fda4af"/>
+              <circle cx="43.5" cy="107" r="2.2" fill="#fda4af"/>
+              <circle cx="50" cy="105.5" r="2.2" fill="#fda4af"/>
+              <circle cx="56.5" cy="107" r="2.2" fill="#fda4af"/>
+            </g>
+
+            <!-- Right Paw -->
+            <g class="cat-paw cat-paw--right">
+              <ellipse cx="110" cy="112" rx="16" ry="12" fill="url(#catFaceGrad)" stroke="#334155" stroke-width="2.6"/>
+              <ellipse cx="110" cy="113" rx="5.5" ry="4.2" fill="#fda4af"/>
+              <circle cx="103.5" cy="107" r="2.2" fill="#fda4af"/>
+              <circle cx="110" cy="105.5" r="2.2" fill="#fda4af"/>
+              <circle cx="116.5" cy="107" r="2.2" fill="#fda4af"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="login-heading">
+        <span class="login-kicker">SECURE ACCESS</span>
+        <h1 id="login-title">ระบบเครื่องมือจัดการไฟล์</h1>
+        <p>กรอกรหัสผ่านเพื่อเข้าสู่พื้นที่ทำงานของคุณ</p>
+      </div>
+      <form class="login-form" id="login-form" novalidate>
+        <label for="access-password">รหัสผ่าน</label>
+        <div class="password-field">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2M6 10h12v10H6z"/></svg>
+          <input id="access-password" name="password" type="password" autocomplete="current-password" placeholder="กรอกรหัสผ่าน" required />
+          <button class="password-toggle" id="password-toggle" type="button" aria-label="แสดงรหัสผ่าน" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"/><circle cx="12" cy="12" r="2.5"/></svg>
+          </button>
+        </div>
+        <label class="remember-me-label" for="remember-me">
+          <input type="checkbox" id="remember-me" name="remember" checked />
+          <span>จดจำการเข้าสู่ระบบบนอุปกรณ์นี้</span>
+        </label>
+        <p class="login-error" id="login-error" role="alert" aria-live="polite"></p>
+        <button class="login-submit" id="login-submit" type="submit">
+          <span class="button-label">เข้าสู่ระบบ</span>
+          <span class="button-spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+      <p class="privacy-note">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.6-2.8 8-7 10-4.2-2-7-5.4-7-10V6l7-3z"/><path d="m9 12 2 2 4-4"/></svg>
+        ไฟล์ทั้งหมดประมวลผลบนอุปกรณ์ของคุณ
+      </p>
+    </div>
+  </section>
+
+  <div class="app-shell" id="app-shell" hidden>
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a class="brand" href="#home" data-page="home" aria-label="กลับหน้า Dashboard">
+          <span class="brand-mark" aria-hidden="true"><span></span></span>
+          <span class="brand-copy"><strong>TOOLBOX</strong><small>FILE UTILITIES</small></span>
+        </a>
+        <button class="sidebar-close" id="sidebar-close" type="button" aria-label="ปิดเมนู">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <nav class="nav" aria-label="เมนูเครื่องมือหลัก">
+        <div class="nav-section">
+          <a class="nav-item active" href="#home" data-page="home" title="Dashboard">
+            <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9H3z"/><path d="M9 20v-6h6v6"/></svg></span>
+            <span class="nav-text">Dashboard</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-label">PDF TOOLS</span>
+          <a class="nav-item" href="#pdf" data-page="pdf" title="PDF Batch Print"><span class="nav-icon"><img class="tool-custom-icon" src="images/Printer.png" alt="PDF Batch Print" /></span><span class="nav-text">PDF Batch Print</span><span class="nav-live">LIVE</span></a>
+          <a class="nav-item" href="#merge" data-page="merge" title="Merge PDF"><span class="nav-icon"><img class="tool-custom-icon" src="images/MERGE PDF.png" alt="Merge PDF" /></span><span class="nav-text">Merge PDF</span><span class="nav-live">LIVE</span></a>
+          <a class="nav-item" href="#split" data-page="split" title="Split & Organize"><span class="nav-icon"><img class="tool-custom-icon" src="images/SPLIT & ORGANIZE.png" alt="Split & Organize" /></span><span class="nav-text">Split & Organize</span><span class="nav-live nav-live--new">NEW</span></a>
+          <a class="nav-item" href="#pagenum" data-page="pagenum" title="Add Page Numbers"><span class="nav-icon"><img class="tool-custom-icon" src="images/ADD PAGE NUMBERS.png" alt="Add Page Numbers" /></span><span class="nav-text">Add Page Numbers</span><span class="nav-live nav-live--new">NEW</span></a>
+          <a class="nav-item" href="#extract" data-page="extract" title="Extract Images"><span class="nav-icon"><img class="tool-custom-icon" src="images/EXTRACT IMAGES.png" alt="Extract Images" /></span><span class="nav-text">Extract Images</span><span class="nav-live nav-live--new">NEW</span></a>
+          <a class="nav-item" href="#mailmerge" data-page="mailmerge" title="PDF Mail Merge"><span class="nav-icon"><img class="tool-custom-icon" src="images/PDF MAIL MERGE.png" alt="PDF Mail Merge" /></span><span class="nav-text">PDF Mail Merge</span><span class="nav-live nav-live--new">NEW</span></a>
+          <a class="nav-item" href="#watermark" data-page="watermark" title="Remove Watermark"><span class="nav-icon"><img class="tool-custom-icon" src="images/REMOVE WATERMARK.png" alt="Remove Watermark" /></span><span class="nav-text">Remove Watermark</span><span class="nav-live">LIVE</span></a>
+          <a class="nav-item" href="#add-wm" data-page="add-wm" title="Add Watermark"><span class="nav-icon"><img class="tool-custom-icon" src="images/ADD WATERMARK.png" alt="Add Watermark" /></span><span class="nav-text">Add Watermark</span><span class="nav-live nav-live--new">NEW</span></a>
+          <a class="nav-item" href="#redactor" data-page="redactor" title="Document Redactor"><span class="nav-icon"><img class="tool-custom-icon" src="images/DOCUMENT REDACTOR.png" alt="Document Redactor" /></span><span class="nav-text">Document Redactor</span><span class="nav-live nav-live--new">NEW</span></a>
+          <a class="nav-item" href="#compress" data-page="compress" title="Compress PDF & Image"><span class="nav-icon"><img class="tool-custom-icon" src="images/COMPRESS PDF & IMAGE 2.png" alt="Compress PDF & Image" /></span><span class="nav-text">Compress PDF & Image</span><span class="nav-live">LIVE</span></a>
+          <a class="nav-item" href="#convert" data-page="convert" title="Convert Files"><span class="nav-icon"><img class="tool-custom-icon" src="images/CONVERT FILES.png" alt="Convert Files" /></span><span class="nav-text">Convert Files</span><span class="nav-live">LIVE</span></a>
+          <a class="nav-item" href="#lock" data-page="lock" title="PDF Lock"><span class="nav-icon"><img class="tool-custom-icon" src="images/PDF LOCK.png" alt="PDF Lock" /></span><span class="nav-text">PDF Lock</span><span class="nav-live">LIVE</span></a>
+          <a class="nav-item" href="#unlock" data-page="unlock" title="PDF Unlock"><span class="nav-icon"><img class="tool-custom-icon" src="images/PDF UNLOCK.png" alt="PDF Unlock" /></span><span class="nav-text">PDF Unlock</span><span class="nav-live">LIVE</span></a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-label">GENERAL TOOLS</span>
+          <a class="nav-item" href="#schedprint" data-page="schedprint" title="Scheduled Print"><span class="nav-icon"><img class="tool-custom-icon" src="images/SCHEDULED PRINT.png" alt="Scheduled Print" /></span><span class="nav-text">Scheduled Print</span><span class="nav-live">LIVE</span></a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-label">IMAGE TOOLS</span>
+          <a class="nav-item" href="#ocr" data-page="ocr" title="Image to Text (OCR)"><span class="nav-icon"><img class="tool-custom-icon" src="images/IMAGE TO TEXT (OCR).png" alt="Image to Text (OCR)" /></span><span class="nav-text">Image to Text (OCR)</span><span class="nav-live nav-live--new">NEW</span></a>
+          <a class="nav-item" href="#resizer" data-page="resizer" title="Bulk Resizer"><span class="nav-icon"><img class="tool-custom-icon" src="images/BULK RESIZER.png" alt="Bulk Resizer" /></span><span class="nav-text">Bulk Resizer</span><span class="nav-live nav-live--new">NEW</span></a>
+          <a class="nav-item" href="#collage" data-page="collage" title="Slip Collage"><span class="nav-icon"><img class="tool-custom-icon" src="images/SLIP COLLAGE.png" alt="Slip Collage" /></span><span class="nav-text">Slip Collage</span><span class="nav-live nav-live--new">NEW</span></a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-label">DATA TOOLS</span>
+          <a class="nav-item" href="#qr" data-page="qr" title="Batch QR Code"><span class="nav-icon"><img class="tool-custom-icon" src="images/BATCH QR CODE.png" alt="Batch QR Code" /></span><span class="nav-text">Batch QR Code</span><span class="nav-live nav-live--new">NEW</span></a>
+          <a class="nav-item" href="#cleaner" data-page="cleaner" title="Data Cleaner"><span class="nav-icon"><img class="tool-custom-icon" src="images/DATA CLEANER.png" alt="Data Cleaner" /></span><span class="nav-text">Data Cleaner</span><span class="nav-live nav-live--new">NEW</span></a>
+          <a class="nav-item" href="#renamer" data-page="renamer" title="Batch Renamer"><span class="nav-icon"><img class="tool-custom-icon" src="images/BATCH RENAMER.png" alt="Batch Renamer" /></span><span class="nav-text">Batch Renamer</span><span class="nav-live nav-live--new">NEW</span></a>
+          <a class="nav-item" href="#csv" data-page="csv" title="CSV Merger/Splitter"><span class="nav-icon"><img class="tool-custom-icon" src="images/CSV MERGER SPLITTER.png" alt="CSV Merger/Splitter" /></span><span class="nav-text">CSV Merger/Splitter</span><span class="nav-live nav-live--new">NEW</span></a>
+        </div>
+
+        <div class="nav-section">
+          <span class="nav-label">HR</span>
+          <a class="nav-item external-tool" href="https://hr-certificate.pages.dev/" target="_blank" rel="noopener noreferrer" data-external-id="cert" title="Certificate"><span class="nav-icon"><img class="tool-custom-icon" src="images/CERTIFICATE.png" alt="Certificate" /></span><span class="nav-text">Certificate</span><span class="external-icon">↗</span></a>
+        </div>
+        <div class="nav-section">
+          <span class="nav-label">OFFICE</span>
+          <a class="nav-item external-tool" href="https://script.google.com/macros/s/AKfycbzN7DJXgZyuFlz12GjAJjcDVe15B6fNAG7aLszXeyIBvWwD6AdzZlZUPPmcZ3StF5s/exec" target="_blank" rel="noopener noreferrer" data-external-id="meeting" title="จองห้องประชุม"><span class="nav-icon"><img class="tool-custom-icon" src="images/MEETING ROOM.png" alt="จองห้องประชุม" /></span><span class="nav-text">จองห้องประชุม</span><span class="external-icon">↗</span></a>
+        </div>
+        <div class="nav-section">
+          <span class="nav-label">ADMIN</span>
+          <a class="nav-item external-tool" href="https://script.google.com/macros/s/AKfycbzM47RYLjJBJ0a7QLcT-InU2NOtC7eS_gBFJFabXdmrBWYfV3GZ7osqz1yrJiR8D0xC/exec" target="_blank" rel="noopener noreferrer" data-external-id="excel" title="Excel Admin"><span class="nav-icon"><img class="tool-custom-icon" src="images/EXCEL ADMIN.png" alt="Excel Admin" /></span><span class="nav-text">Excel Admin</span><span class="external-icon">↗</span></a>
+          <a class="nav-item external-tool" href="https://script.google.com/macros/s/AKfycbxufah9Ub9ul7khRX3iaJSlVZtjD5Z6wPL6Mdy-iV-iCWsO6UaVxA7QLFtxXz_2WkT5/exec" target="_blank" rel="noopener noreferrer" data-external-id="excel-pgsn" title="Excel Admin PGSN"><span class="nav-icon"><img class="tool-custom-icon" src="images/EXCEL ADMIN PGSN.png" alt="Excel Admin PGSN" /></span><span class="nav-text">Excel Admin PGSN</span><span class="external-icon">↗</span></a>
+          <a class="nav-item external-tool" href="https://4439ab01.pegasus-stock.pages.dev/" target="_blank" rel="noopener noreferrer" data-external-id="express" title="Express Admin"><span class="nav-icon"><img class="tool-custom-icon" src="images/EXPRESS ADMIN.png" alt="Express Admin" /></span><span class="nav-text">Express Admin</span><span class="external-icon">↗</span></a>
+        </div>
+      </nav>
+      <div class="sidebar-footer"><span class="status-dot"></span><span class="nav-text">พร้อมใช้งาน · v2.0</span></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-label="ย่อหรือเปิดเมนู" aria-expanded="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg>
+          <label class="sr-only" for="tool-search">ค้นหาเครื่องมือ</label>
+          <input id="tool-search" type="search" placeholder="ค้นหาเครื่องมือ..." autocomplete="off" aria-controls="search-results" aria-expanded="false" />
+          <kbd>⌘K</kbd>
+          <div class="search-results" id="search-results" role="listbox" hidden></div>
+        </div>
+        <div class="profile-wrap">
+          <button class="profile-button" id="profile-button" type="button" aria-haspopup="menu" aria-expanded="false">
+            <img class="avatar" src="images/profile.png" onerror="this.onerror=null;this.src='images/profille.png';" alt="Beam" /><span class="profile-copy"><strong>Beam</strong><small>Administrator</small></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
+          </button>
+          <div class="profile-menu" id="profile-menu" role="menu" hidden>
+            <button id="logout-button" type="button" role="menuitem"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></svg>ออกจากระบบ</button>
+          </div>
+        </div>
+      </header>
+      <div class="route-heading" id="route-heading"><span>Toolbox</span><span aria-hidden="true">/</span><strong id="breadcrumb-current">Dashboard</strong></div>
+      <div class="page-container" id="page-container" tabindex="-1"></div>
+    </main>
+
+    <aside class="utility-panel" id="utility-panel" aria-label="แผงข้อมูลการใช้งาน">
+      <section class="utility-card utility-card--fav">
+        <div class="utility-heading utility-heading--fav">
+          <div class="fav-header-icon-group">
+            <svg class="fav-header-star" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2.5C12.3 2.5 12.6 2.7 12.8 3L15.3 7.8C15.5 8.2 15.9 8.5 16.3 8.6L21.7 9.4C22.3 9.5 22.6 10.3 22.1 10.7L18.2 14.5C17.9 14.8 17.8 15.3 17.8 15.7L18.7 21C18.8 21.7 18.2 22.2 17.6 21.8L12.7 19.3C12.3 19.1 11.7 19.1 11.3 19.3L6.4 21.8C5.8 22.2 5.2 21.7 5.3 21L6.2 15.7C6.2 15.3 6.1 14.8 5.8 14.5L1.9 10.7C1.4 10.3 1.7 9.5 2.3 9.4L7.7 8.6C8.1 8.5 8.5 8.2 8.7 7.8L11.2 3C11.4 2.7 11.7 2.5 12 2.5Z" fill="#FBBF24" stroke="#F59E0B" stroke-width="1.2" stroke-linejoin="round"/>
+            </svg>
+            <svg class="fav-header-wave" viewBox="0 0 20 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 3C3 1 5 5 7 3C9 1 11 5 13 3C15 1 17 5 19 3" stroke="#818CF8" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="fav-header-titles">
+            <h2>รายการโปรด</h2>
+            <p>เครื่องมือที่คุณใช้บ่อย</p>
+          </div>
+        </div>
+        <div class="utility-list" id="favorites-list"></div>
+      </section>
+      <section class="utility-card utility-card--recent">
+        <div class="utility-heading"><h2><span class="utility-heading-icon utility-heading-icon--blue">↗</span>เข้าใช้งานล่าสุด</h2><button id="clear-recent" type="button">ล้าง</button></div>
+        <div class="utility-list" id="recent-list"></div>
+      </section>
+      <section class="utility-card utility-card--frequent">
+        <div class="utility-heading"><h2><span class="utility-heading-icon utility-heading-icon--green">⌁</span>เครื่องมือที่ใช้บ่อย</h2></div>
+        <div class="utility-list" id="frequent-list"></div>
+      </section>
+      <div class="local-processing-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.6-2.8 8-7 10-4.2-2-7-5.4-7-10V6l7-3z"/><path d="m9 12 2 2 4-4"/></svg><span><strong>ทำงานอย่างเป็นส่วนตัว</strong>ไฟล์ไม่ถูกส่งขึ้นเซิร์ฟเวอร์</span></div>
+    </aside>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+    <div class="modal" id="modal" tabindex="-1">
+      <div class="modal-header">
+        <div class="modal-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg></div>
+        <div><h2 class="modal-title" id="modal-title">ยืนยันการพิมพ์</h2><p class="modal-subtitle" id="modal-subtitle">—</p></div>
+      </div>
+      <div class="modal-list" id="modal-list"></div>
+      <div class="modal-actions"><button class="btn btn--ghost" id="modal-cancel" type="button">ยกเลิก</button><button class="btn btn--primary" id="modal-confirm" type="button">พิมพ์เลย</button></div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js?v=cat-mascot-20260916"></script>
+  <script src="js/utilities.js"></script>
+  <script src="js/pdf-print.js"></script>
+  <script src="js/merge-pdf.js"></script>
+  <script src="js/compress-pdf.js"></script>
+  <script src="js/convert-files.js"></script>
+  <script src="js/split-pdf.js"></script>
+  <script src="js/page-number.js"></script>
+  <script src="js/extract-images.js"></script>
+  <script src="js/pdf-mail-merge.js"></script>
+  <script src="js/add-watermark.js"></script>
+  <script src="js/pdf-redactor.js"></script>
+  <script src="js/ocr-tool.js"></script>
+  <script src="js/bulk-resizer.js"></script>
+  <script src="js/slip-collage.js"></script>
+  <script src="js/batch-qr.js"></script>
+  <script src="js/data-cleaner.js"></script>
+  <script src="js/batch-renamer.js"></script>
+  <script src="js/csv-merger.js"></script>
+  <script src="js/remove-watermark.js"></script>
+  <script src="js/pdf-unlock.js"></script>
+  <script src="js/pdf-lock.js"></script>
+  <script src="js/scheduled-print.js"></script>
+  <script src="js/sign-pdf.js"></script>
+  <script src="js/word-to-pdf.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
