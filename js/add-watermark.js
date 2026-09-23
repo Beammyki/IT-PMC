@@ -10,6 +10,63 @@ const AddWatermark = (() => {
     el.textContent = msg;
   }
 
+  async function createUnicodeWatermark(text, size) {
+    const scale = 4;
+    const canvas = document.createElement('canvas');
+    let context = canvas.getContext('2d');
+    if (!context) throw new Error('เบราว์เซอร์ไม่รองรับการสร้างภาพลายน้ำ');
+
+    const family = '"Noto Sans Thai", Tahoma, sans-serif';
+    if (document.fonts?.load) {
+      try {
+        await document.fonts.load(`700 ${size * scale}px ${family}`, text);
+      } catch (_) {
+        // Fall back to a system Thai font if the web font cannot be loaded.
+      }
+    }
+
+    context.font = `700 ${size * scale}px ${family}`;
+    let metrics = context.measureText(text);
+    const maxCanvasWidth = 12000;
+    const renderScale = Math.min(scale, maxCanvasWidth / Math.max(metrics.width, 1));
+    const fontSize = size * renderScale;
+    context.font = `700 ${fontSize}px ${family}`;
+    metrics = context.measureText(text);
+
+    const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.8;
+    const descent = metrics.actualBoundingBoxDescent || fontSize * 0.2;
+    const padding = Math.ceil(fontSize * 0.18);
+    canvas.width = Math.max(1, Math.ceil(metrics.width + padding * 2));
+    canvas.height = Math.max(1, Math.ceil(ascent + descent + padding * 2));
+
+    context = canvas.getContext('2d');
+    context.font = `700 ${fontSize}px ${family}`;
+    context.textBaseline = 'alphabetic';
+    context.fillStyle = '#cc3333';
+    context.fillText(text, padding, padding + ascent);
+
+    const png = await new Promise((resolve, reject) => {
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('สร้างภาพลายน้ำไม่สำเร็จ')), 'image/png');
+    });
+    return {
+      bytes: new Uint8Array(await png.arrayBuffer()),
+      width: canvas.width / renderScale,
+      height: canvas.height / renderScale,
+    };
+  }
+
+  function centeredPosition(pageWidth, pageHeight, imageWidth, imageHeight, diagonal) {
+    const centerX = pageWidth / 2;
+    const centerY = pageHeight / 2;
+    if (!diagonal) return { x: centerX - imageWidth / 2, y: centerY - imageHeight / 2 };
+
+    const angle = Math.PI / 4;
+    return {
+      x: centerX - (imageWidth / 2) * Math.cos(angle) + (imageHeight / 2) * Math.sin(angle),
+      y: centerY - (imageWidth / 2) * Math.sin(angle) - (imageHeight / 2) * Math.cos(angle),
+    };
+  }
+
   async function handleFile(file) {
     if (!file || file.type !== 'application/pdf') {
       setStatus('กรุณาอัปโหลดไฟล์ PDF เท่านั้น', true);
@@ -39,18 +96,44 @@ const AddWatermark = (() => {
     setStatus('กำลังประทับลายน้ำ...');
 
     try {
-      const text = document.getElementById('aw-text').value;
+      const text = document.getElementById('aw-text').value.trim();
       const opacity = parseFloat(document.getElementById('aw-opacity').value);
       const size = parseInt(document.getElementById('aw-size').value);
       const isDiagonal = document.getElementById('aw-layout').value === 'diagonal';
+
+      if (!text) throw new Error('กรุณากรอกข้อความลายน้ำ');
+      if (!Number.isFinite(size) || size < 8 || size > 200) {
+        throw new Error('ขนาดตัวอักษรต้องอยู่ระหว่าง 8 ถึง 200');
+      }
       
       const { PDFDocument, rgb, degrees, StandardFonts } = PDFLib;
       const pdfDoc = await PDFDocument.load(fileBuffer);
       const pages = pdfDoc.getPages();
-      const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const hasUnicode = /[^\u0000-\u00ff]/.test(text);
+      let watermarkImage = null;
+      if (hasUnicode) {
+        const watermark = await createUnicodeWatermark(text, size);
+        watermarkImage = {
+          ...watermark,
+          image: await pdfDoc.embedPng(watermark.bytes),
+        };
+      }
+      const font = hasUnicode ? null : await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
       pages.forEach(page => {
         const { width, height } = page.getSize();
+        if (watermarkImage) {
+          const position = centeredPosition(width, height, watermarkImage.width, watermarkImage.height, isDiagonal);
+          page.drawImage(watermarkImage.image, {
+            ...position,
+            width: watermarkImage.width,
+            height: watermarkImage.height,
+            rotate: degrees(isDiagonal ? 45 : 0),
+            opacity,
+          });
+          return;
+        }
+
         const textWidth = font.widthOfTextAtSize(text, size);
         const textHeight = font.heightAtSize(size);
         
@@ -98,6 +181,8 @@ const AddWatermark = (() => {
   function reset() {
     fileBuffer = null;
     fileName = '';
+    const input = document.getElementById('aw-input');
+    if (input) input.value = '';
     document.getElementById('aw-drop-zone').style.display = 'flex';
     document.getElementById('aw-workspace').style.display = 'none';
     setStatus('');
@@ -128,8 +213,9 @@ const AddWatermark = (() => {
             <div id="aw-info" style="font-weight: 500; font-size: 14px; margin-bottom: 16px;"></div>
             
             <div style="margin-bottom: 16px;">
-              <label style="display:block; font-size:12px; color:var(--text-2); margin-bottom:6px;">ข้อความลายน้ำ (รองรับภาษาอังกฤษ)</label>
-              <input type="text" id="aw-text" value="CONFIDENTIAL" style="width:100%; padding:8px 12px; background:#111; color:#fff; border:1px solid #333; border-radius:4px; font-family:inherit; font-size:14px;" />
+              <label for="aw-text" style="display:block; font-size:12px; color:var(--text-2); margin-bottom:6px;">ข้อความลายน้ำ (รองรับภาษาไทยและอังกฤษ)</label>
+              <input type="text" id="aw-text" lang="th" maxlength="120" value="CONFIDENTIAL" style="width:100%; padding:8px 12px; background:#111; color:#fff; border:1px solid #333; border-radius:4px; font-family:inherit; font-size:14px;" />
+              <small style="display:block; margin-top:6px; color:var(--text-3); font-size:11px;">ข้อความที่มีภาษาไทยจะฝังเป็นภาพความละเอียดสูง เพื่อให้แสดงผลได้ถูกต้อง</small>
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
@@ -144,7 +230,7 @@ const AddWatermark = (() => {
               </div>
               <div>
                 <label style="display:block; font-size:12px; color:var(--text-2); margin-bottom:6px;">ขนาดตัวอักษร</label>
-                <input type="number" id="aw-size" value="60" style="width:100%; padding:8px 12px; background:#111; color:#fff; border:1px solid #333; border-radius:4px; font-family:inherit;" />
+                <input type="number" id="aw-size" min="8" max="200" value="60" style="width:100%; padding:8px 12px; background:#111; color:#fff; border:1px solid #333; border-radius:4px; font-family:inherit;" />
               </div>
               <div>
                 <label style="display:block; font-size:12px; color:var(--text-2); margin-bottom:6px;">รูปแบบการวาง</label>
