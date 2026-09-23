@@ -512,7 +512,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); box-sh
 .merge-page-item:hover { border-color: #cbd5f2; box-shadow: 0 8px 20px rgba(47,65,118,.1); transform: translateY(-2px); }
 .merge-page-item.is-dragging { opacity: .45; cursor: grabbing; }
 .merge-page-item.is-drop-target { border: 2px dashed var(--primary); background: var(--primary-soft); }
-.merge-page-preview { display: grid; place-items: center; height: 158px; overflow: hidden; border-radius: 7px; background: #f3f5fa; }
+.merge-page-preview { position: relative; display: grid; place-items: center; width: 100%; height: 158px; padding: 0; overflow: hidden; border: 0; border-radius: 7px; background: #f3f5fa; cursor: zoom-in; }
+.merge-page-preview:focus-visible { outline: 3px solid rgba(91,109,246,.45); outline-offset: 2px; }
 .merge-page-thumb { display: block; width: 100%; height: 100%; object-fit: contain; background: #fff; }
 .merge-page-placeholder { padding: 8px; color: var(--text-3); font-size: 10px; text-align: center; }
 .merge-page-caption { display: flex; align-items: center; min-width: 0; margin-top: 8px; gap: 6px; }
@@ -523,6 +524,19 @@ input:focus, select:focus, textarea:focus { border-color: var(--primary); box-sh
 .merge-page-actions [data-action="remove"] { margin-left: auto; }
 .merge-page-actions .action-btn:disabled, #merge-clear-btn:disabled { opacity: .45; cursor: not-allowed; }
 .merge-status { display: none; }
+.merge-preview-dialog { width: min(1080px, calc(100vw - 32px)); max-width: none; max-height: calc(100vh - 32px); padding: 0; overflow: hidden; border: 1px solid rgba(255,255,255,.7); border-radius: 16px; color: var(--text); background: #fff; box-shadow: 0 28px 90px rgba(16,24,40,.32); }
+.merge-preview-dialog::backdrop { background: rgba(16,24,40,.72); backdrop-filter: blur(5px); }
+.merge-preview-dialog__content { display: flex; max-height: calc(100vh - 32px); flex-direction: column; }
+.merge-preview-dialog__header { display: flex; align-items: center; justify-content: space-between; padding: 15px 18px; gap: 14px; border-bottom: 1px solid var(--border); }
+.merge-preview-dialog__heading { min-width: 0; }
+.merge-preview-dialog__heading h2 { margin: 0; font-size: 15px; }
+.merge-preview-dialog__heading p { margin: 4px 0 0; overflow: hidden; color: var(--text-3); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.merge-preview-close { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border: 1px solid var(--border); border-radius: 10px; color: var(--text-2); background: #fff; font-size: 24px; cursor: pointer; }
+.merge-preview-close:hover { color: var(--text); background: var(--surface2); }
+.merge-preview-stage { display: grid; min-height: 140px; padding: 18px; place-items: center; overflow: auto; background: #f3f5fa; }
+.merge-preview-stage img { display: block; max-width: 100%; max-height: calc(100vh - 150px); object-fit: contain; border-radius: 5px; background: #fff; box-shadow: 0 4px 18px rgba(16,24,40,.12); }
+.merge-preview-loading { margin: 0; color: var(--text-2); font-size: 13px; text-align: center; }
+.merge-preview-hint { margin: 0; padding: 0 18px 13px; color: var(--text-3); font-size: 10px; text-align: right; }
 
 /* Modal */
 .modal-overlay { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 20px; pointer-events: none; opacity: 0; background: rgba(16,24,40,.45); backdrop-filter: blur(4px); transition: .2s; }

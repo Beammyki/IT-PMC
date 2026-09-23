@@ -7,6 +7,7 @@ const MergePdf = (() => {
   let isLoading = false;
   let isMerging = false;
   let dragSourceId = null;
+  let previewRequest = 0;
   let statusMessage = '';
 
   function getFileKind(file) {
@@ -69,10 +70,10 @@ const MergePdf = (() => {
       item.draggable = !isLoading && !isMerging;
       item.setAttribute('aria-label', `หน้า ${index + 1} จาก ${page.file.name}`);
       item.innerHTML = `
-        <div class="merge-page-preview">
+        <button class="merge-page-preview" type="button" data-action="preview" aria-label="เปิดดูหน้า ${index + 1} ขนาดใหญ่">
           <img class="merge-page-thumb" alt="" ${page.thumbnail ? '' : 'hidden'} />
           <span class="merge-page-placeholder" ${page.thumbnail ? 'hidden' : ''}>กำลังสร้างภาพตัวอย่าง...</span>
-        </div>
+        </button>
         <div class="merge-page-caption">
           <span class="merge-page-number">Page ${index + 1}</span>
           <span class="merge-page-source" title="${escapeHtml(page.file.name)}"></span>
@@ -94,6 +95,7 @@ const MergePdf = (() => {
       item.querySelector('[data-action="up"]').addEventListener('click', () => moveUp(index));
       item.querySelector('[data-action="down"]').addEventListener('click', () => moveDown(index));
       item.querySelector('[data-action="remove"]').addEventListener('click', () => removePage(index));
+      item.querySelector('[data-action="preview"]').addEventListener('click', () => openPreview(page.id));
       item.addEventListener('dragstart', handleDragStart);
       item.addEventListener('dragover', handleDragOver);
       item.addEventListener('dragenter', handleDragEnter);
@@ -177,6 +179,78 @@ const MergePdf = (() => {
 
   function createPage(file, sourceId, kind, pageIndex, thumbnail = null) {
     return { id: String(++nextId), file, sourceId, kind, pageIndex, thumbnail };
+  }
+
+  async function openPreview(pageId) {
+    const pageIndex = pages.findIndex(page => page.id === pageId);
+    const page = pages[pageIndex];
+    const dialog = document.getElementById('merge-preview-dialog');
+    const image = document.getElementById('merge-preview-image');
+    const loadingMessage = document.getElementById('merge-preview-loading');
+    if (!page || !page.thumbnail || !dialog || !image || !loadingMessage) return;
+
+    const requestId = ++previewRequest;
+    document.getElementById('merge-preview-title').textContent = `Page ${pageIndex + 1}`;
+    document.getElementById('merge-preview-source').textContent = page.kind === 'pdf'
+      ? `${page.file.name} · หน้าเดิม ${page.pageIndex + 1}`
+      : page.file.name;
+    image.hidden = true;
+    image.removeAttribute('src');
+    loadingMessage.textContent = page.kind === 'pdf' ? 'กำลังโหลดภาพความละเอียดสูง...' : '';
+    loadingMessage.hidden = page.kind !== 'pdf';
+    if (!dialog.open) dialog.showModal();
+
+    if (page.kind !== 'pdf') {
+      image.src = page.thumbnail;
+      image.alt = `ตัวอย่างหน้า ${pageIndex + 1} จาก ${page.file.name}`;
+      image.hidden = false;
+      return;
+    }
+
+    let loadingTask;
+    let pdf;
+    let pdfPage;
+    let canvas;
+    try {
+      const bytes = await page.file.arrayBuffer();
+      loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(bytes) });
+      pdf = await loadingTask.promise;
+      pdfPage = await pdf.getPage(page.pageIndex + 1);
+      const baseViewport = pdfPage.getViewport({ scale: 1 });
+      const scale = Math.min(
+        2.2,
+        1600 / baseViewport.width,
+        1400 / baseViewport.height,
+        (window.innerWidth - 56) / baseViewport.width,
+        (window.innerHeight - 168) / baseViewport.height
+      );
+      const viewport = pdfPage.getViewport({ scale: Math.max(0.4, scale) });
+      canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = Math.ceil(viewport.width);
+      canvas.height = Math.ceil(viewport.height);
+      await pdfPage.render({ canvasContext: context, viewport }).promise;
+      if (dialog.open && requestId === previewRequest) {
+        image.src = canvas.toDataURL('image/jpeg', 0.92);
+        image.alt = `ตัวอย่างหน้า ${pageIndex + 1} จาก ${page.file.name}`;
+        image.hidden = false;
+        loadingMessage.hidden = true;
+      }
+    } catch (error) {
+      if (dialog.open && requestId === previewRequest) {
+        loadingMessage.textContent = `เปิดภาพตัวอย่างไม่ได้: ${error.message}`;
+      }
+    } finally {
+      if (pdfPage) pdfPage.cleanup();
+      if (canvas) {
+        canvas.width = 0;
+        canvas.height = 0;
+      }
+      try {
+        if (pdf) await pdf.destroy();
+        else if (loadingTask) await loadingTask.destroy();
+      } catch (_) {}
+    }
   }
 
   async function addPdfPages(source) {
@@ -415,6 +489,22 @@ const MergePdf = (() => {
           <div class="progress-track" id="merge-track"><div class="progress-fill" id="merge-fill"></div></div>
           <div class="status-text merge-status" id="merge-status" aria-live="polite"></div>
         </div>
+        <dialog class="merge-preview-dialog" id="merge-preview-dialog" aria-labelledby="merge-preview-title">
+          <div class="merge-preview-dialog__content">
+            <header class="merge-preview-dialog__header">
+              <div class="merge-preview-dialog__heading">
+                <h2 id="merge-preview-title">Page preview</h2>
+                <p id="merge-preview-source"></p>
+              </div>
+              <button class="merge-preview-close" type="button" aria-label="ปิดภาพตัวอย่าง">×</button>
+            </header>
+            <div class="merge-preview-stage">
+              <p class="merge-preview-loading" id="merge-preview-loading" aria-live="polite" hidden></p>
+              <img id="merge-preview-image" alt="" />
+            </div>
+            <p class="merge-preview-hint">กด Esc หรือคลิกด้านนอกเพื่อปิด</p>
+          </div>
+        </dialog>
       </div>
     `;
 
@@ -436,6 +526,19 @@ const MergePdf = (() => {
     });
     document.getElementById('merge-clear-btn').addEventListener('click', clearAll);
     document.getElementById('merge-btn').addEventListener('click', doMerge);
+    const previewDialog = document.getElementById('merge-preview-dialog');
+    document.querySelector('.merge-preview-close').addEventListener('click', () => previewDialog.close());
+    previewDialog.addEventListener('click', event => {
+      if (event.target === previewDialog) previewDialog.close();
+    });
+    previewDialog.addEventListener('close', () => {
+      previewRequest++;
+      const image = document.getElementById('merge-preview-image');
+      if (image) {
+        image.removeAttribute('src');
+        image.hidden = true;
+      }
+    });
     render();
     if (statusMessage) setStatus(statusMessage);
   }
