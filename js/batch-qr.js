@@ -27,7 +27,7 @@ const BatchQr = (() => {
 
   function updateCount() {
     const text = document.getElementById('qr-input-text').value;
-    items = text.split('\\n').map(t => t.trim()).filter(t => t !== '');
+    items = text.split(/\r?\n/).map(t => t.trim()).filter(t => t !== '');
     document.getElementById('qr-count').textContent = `จำนวนที่ต้องสร้าง: ${items.length} รายการ`;
     document.getElementById('qr-btn-process').disabled = items.length === 0;
   }
@@ -39,6 +39,12 @@ const BatchQr = (() => {
     setStatus('กำลังสร้าง QR Code...');
     
     try {
+      if (!window.QRCode || typeof window.QRCode.toDataURL !== 'function') {
+        throw new Error('โหลดเครื่องมือสร้าง QR ไม่สำเร็จ กรุณารีเฟรชหน้าแล้วลองอีกครั้ง');
+      }
+      if (!window.JSZip) {
+        throw new Error('โหลดเครื่องมือ ZIP ไม่สำเร็จ กรุณารีเฟรชหน้าแล้วลองอีกครั้ง');
+      }
       const zip = new JSZip();
       const margin = parseInt(document.getElementById('qr-margin').value) || 2;
       const width = parseInt(document.getElementById('qr-size').value) || 300;
@@ -113,7 +119,7 @@ const BatchQr = (() => {
               <input type="file" id="qr-csv-input" accept=".csv" style="display:none" onchange="BatchQr.handleCsv(this.files[0])" />
             </div>
             
-            <textarea id="qr-input-text" oninput="BatchQr.updateCount()" style="width:100%; height:400px; padding:12px; background:rgba(0,0,0,0.2); color:#fff; border:1px solid rgba(255,255,255,0.1); border-radius:var(--r); font-family:var(--font-mono); font-size:13px; resize:none; line-height:1.6;" placeholder="https://google.com\\nhttps://facebook.com\\nรหัสสินค้า001\\n..."></textarea>
+            <textarea id="qr-input-text" oninput="BatchQr.updateCount()" style="width:100%; height:400px; padding:12px; background:rgba(0,0,0,0.2); color:#fff; border:1px solid rgba(255,255,255,0.1); border-radius:var(--r); font-family:var(--font-mono); font-size:13px; resize:none; line-height:1.6;" placeholder="https://google.com\nhttps://facebook.com\nรหัสสินค้า001\n..."></textarea>
             
             <div id="qr-count" style="font-size:13px; color:var(--gold);">จำนวนที่ต้องสร้าง: 0 รายการ</div>
           </div>
