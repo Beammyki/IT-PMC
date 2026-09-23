@@ -1,180 +1,352 @@
 const CompressPdf = (() => {
   const files = [];
+  let isCompressing = false;
 
-  function fmt(b) {
-    if (b < 1024) return b + ' B';
-    if (b < 1048576) return Math.round(b / 1024) + ' KB';
-    return (b / 1048576).toFixed(1) + ' MB';
+  function fmt(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return Math.round(bytes / 1024) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
   }
 
-  function setStatus(msg, isError = false) {
+  function isPdf(file) {
+    return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  }
+
+  function isImage(file) {
+    return file.type.startsWith('image/') || /\.(avif|bmp|gif|jpe?g|png|webp)$/i.test(file.name);
+  }
+
+  function setStatus(message, isError = false) {
     const el = document.getElementById('compress-status');
     if (!el) return;
-    el.textContent = msg;
+    el.textContent = message;
     el.className = 'status-text' + (isError ? ' error' : '');
   }
 
-  function setProgress(pct) {
-    const t = document.getElementById('compress-track');
-    const f = document.getElementById('compress-fill');
-    if (!t || !f) return;
-    t.style.display = (pct >= 0 && pct < 100) ? 'block' : 'none';
-    f.style.width = pct + '%';
+  function setProgress(percent) {
+    const track = document.getElementById('compress-track');
+    const fill = document.getElementById('compress-fill');
+    if (!track || !fill) return;
+    track.style.display = percent >= 0 && percent < 100 ? 'block' : 'none';
+    fill.style.width = percent + '%';
   }
 
   function addFiles(newFiles) {
-    for (const f of newFiles) {
-      if (f.type === 'application/pdf' || f.type.startsWith('image/') || f.name.toLowerCase().endsWith('.pdf')) {
-        if (!files.find(x => x.file.name === f.name && x.file.size === f.size)) {
-          files.push({ file: f, status: 'pending' });
-        }
+    if (isCompressing) return;
+    for (const file of newFiles) {
+      if (!isPdf(file) && !isImage(file)) continue;
+      if (!files.some(item => item.file.name === file.name && item.file.size === file.size)) {
+        files.push({ file, status: 'pending' });
       }
     }
     render();
   }
 
-  function removeFile(i) { files.splice(i, 1); render(); }
-  function clearAll() { files.length = 0; render(); setStatus(''); }
+  function removeFile(index) {
+    if (isCompressing) return;
+    files.splice(index, 1);
+    render();
+  }
+
+  function clearAll() {
+    if (isCompressing) return;
+    files.length = 0;
+    render();
+    setStatus('');
+  }
 
   function render() {
-    const sec = document.getElementById('compress-section');
+    const section = document.getElementById('compress-section');
     const list = document.getElementById('compress-list');
-    const btn = document.getElementById('compress-btn');
+    const button = document.getElementById('compress-btn');
     const stat = document.getElementById('compress-stat');
-    const opts = document.getElementById('compress-options');
-    
-    if (!sec) return;
+    const options = document.getElementById('compress-options');
+    const clearButton = document.getElementById('compress-clear-btn');
+    const fileInput = document.getElementById('compress-input');
+    const dropZone = document.getElementById('compress-drop-zone');
+    if (!section) return;
 
-    sec.style.display = files.length ? '' : 'none';
-    if (opts) opts.style.display = files.length ? '' : 'none';
+    section.style.display = files.length ? '' : 'none';
+    if (options) options.style.display = files.length ? '' : 'none';
     if (stat) stat.innerHTML = `<strong>${files.length}</strong> ไฟล์`;
-    if (btn) btn.disabled = files.length === 0;
-    
+    if (button) button.disabled = files.length === 0 || isCompressing;
+    if (clearButton) clearButton.disabled = !files.length || isCompressing;
+    if (fileInput) fileInput.disabled = isCompressing;
+    if (dropZone) dropZone.classList.toggle('is-disabled', isCompressing);
     if (!list) return;
-    list.innerHTML = '';
-    files.forEach((item, i) => {
-      const isImg = item.file.type.startsWith('image/');
-      const tag = isImg ? 'IMG' : 'PDF';
-      const icon = {
-        pending: '',
-        success: '<span style="color:var(--green);font-size:11px;font-family:\'DM Mono\',monospace;flex-shrink:0">✓ OK</span>',
-        error:   '<span style="color:var(--red);font-size:11px;font-family:\'DM Mono\',monospace;flex-shrink:0">✗ Error</span>',
-      }[item.status] || '';
 
-      const div = document.createElement('div');
-      div.className = 'file-item';
-      div.style.animationDelay = (i * 0.04) + 's';
-      div.innerHTML = `
-        <span class="pdf-tag">${tag}</span>
-        <span class="file-name" title="${escapeHtml(item.file.name)}">${escapeHtml(item.file.name)}</span>
-        <span class="file-size">${fmt(item.file.size)}</span>
-        ${icon}
-        <button class="file-remove" onclick="CompressPdf.removeFile(${i})">×</button>
+    list.innerHTML = '';
+    files.forEach((item, index) => {
+      const image = isImage(item.file) && !isPdf(item.file);
+      const badge = {
+        success: `<span class="compress-result-badge">✓ ลด ${item.savedPercent ? item.savedPercent + '%' : '&lt;1%'}</span>`,
+        unchanged: '<span class="compress-result-badge compress-result-badge--same">ขนาดเดิมเหมาะกว่า</span>',
+        error: '<span class="compress-result-badge compress-result-badge--error">✗ Error</span>',
+      }[item.status] || '';
+      const sizeLabel = item.resultSize === undefined
+        ? fmt(item.file.size)
+        : `${fmt(item.file.size)} → ${fmt(item.resultSize)}`;
+      const detail = item.detail ? `<span class="compress-file-detail">${escapeHtml(item.detail)}</span>` : '';
+      const row = document.createElement('div');
+      row.className = 'file-item compress-file-item';
+      row.style.animationDelay = (index * 0.04) + 's';
+      row.innerHTML = `
+        <span class="pdf-tag">${image ? 'IMG' : 'PDF'}</span>
+        <span class="file-name" title="${escapeHtml(item.file.name)}">${escapeHtml(item.file.name)}${detail}</span>
+        <span class="file-size">${sizeLabel}</span>
+        ${badge}
+        <button class="file-remove" type="button" aria-label="ลบ ${escapeHtml(item.file.name)}" ${isCompressing ? 'disabled' : ''} onclick="CompressPdf.removeFile(${index})">×</button>
       `;
-      list.appendChild(div);
+      list.appendChild(row);
+    });
+  }
+
+  function canvasToBlob(canvas, type, quality) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(blob => {
+        if (blob) resolve(blob);
+        else reject(new Error('ไม่สามารถสร้างไฟล์ภาพที่บีบอัดได้'));
+      }, type, quality);
+    });
+  }
+
+  function loadImage(file) {
+    const url = URL.createObjectURL(file);
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(image);
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('เปิดไฟล์รูปภาพไม่ได้'));
+      };
+      image.src = url;
     });
   }
 
   async function compressImage(file, quality) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
+    const image = await loadImage(file);
+    let bestBlob = file;
+    let scale = 1;
+
+    // If quality alone does not reduce an already optimized image, progressively
+    // reduce its pixel dimensions while keeping the selected JPEG quality.
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('เบราว์เซอร์ไม่รองรับการบีบอัดรูปภาพ');
+      context.fillStyle = '#ffffff';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
+      canvas.width = 0;
+      canvas.height = 0;
+      if (blob.size < bestBlob.size) bestBlob = blob;
+      if (bestBlob.size < file.size) break;
+      scale *= 0.84;
+    }
+
+    const reduced = bestBlob.size < file.size;
+    const originalExtension = (file.name.split('.').pop() || 'img').toLowerCase();
+    return {
+      blob: bestBlob,
+      mode: reduced ? 'jpeg' : 'original',
+      extension: reduced ? 'jpg' : originalExtension,
+    };
+  }
+
+  async function rasterizePdf(file, quality, onPageProgress) {
+    if (!window.pdfjsLib || !window.PDFLib) {
+      throw new Error('โหลดเครื่องมือ PDF ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    const task = pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) });
+    let source;
+
+    try {
+      source = await task.promise;
+      const output = await PDFLib.PDFDocument.create();
+      const pageCount = source.numPages;
+
+      for (let pageNumber = 1; pageNumber <= pageCount; pageNumber++) {
+        onPageProgress(pageNumber, pageCount);
+        const sourcePage = await source.getPage(pageNumber);
+        const baseViewport = sourcePage.getViewport({ scale: 1 });
+        const qualityScale = 0.72 + quality * 1.45;
+        const maxPixelsScale = Math.sqrt(6000000 / (baseViewport.width * baseViewport.height));
+        const maxDimensionScale = 2600 / Math.max(baseViewport.width, baseViewport.height);
+        const scale = Math.min(qualityScale, maxPixelsScale, maxDimensionScale);
+        const viewport = sourcePage.getViewport({ scale });
         const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        
-        canvas.toBlob(blob => {
-          if (!blob) reject(new Error('Canvas toBlob failed'));
-          else resolve(blob);
-        }, 'image/jpeg', quality);
-      };
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = URL.createObjectURL(file);
-    });
+        canvas.width = Math.max(1, Math.ceil(viewport.width));
+        canvas.height = Math.max(1, Math.ceil(viewport.height));
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('เบราว์เซอร์ไม่รองรับการเรนเดอร์ PDF');
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        await sourcePage.render({ canvasContext: context, viewport, background: '#ffffff' }).promise;
+
+        const jpeg = await canvasToBlob(canvas, 'image/jpeg', quality);
+        const embeddedImage = await output.embedJpg(await jpeg.arrayBuffer());
+        const page = output.addPage([viewport.width / scale, viewport.height / scale]);
+        page.drawImage(embeddedImage, {
+          x: 0,
+          y: 0,
+          width: viewport.width / scale,
+          height: viewport.height / scale,
+        });
+        canvas.width = 0;
+        canvas.height = 0;
+        sourcePage.cleanup();
+      }
+
+      const bytes = await output.save({ useObjectStreams: true, objectsPerTick: 50 });
+      return new Blob([bytes], { type: 'application/pdf' });
+    } finally {
+      try {
+        if (source) await source.destroy();
+        else await task.destroy();
+      } catch (_) {}
+    }
+  }
+
+  async function compressPdf(file, quality, onPageProgress) {
+    const candidates = [{ blob: file, mode: 'original' }];
+    try {
+      const source = await PDFLib.PDFDocument.load(await file.arrayBuffer(), { ignoreEncryption: true });
+      const bytes = await source.save({
+        useObjectStreams: true,
+        addDefaultPage: false,
+        objectsPerTick: 50,
+      });
+      const optimized = new Blob([bytes], { type: 'application/pdf' });
+      if (optimized.size < file.size) candidates.push({ blob: optimized, mode: 'optimized' });
+    } catch (_) {
+      // Rasterizing below remains the quality-controlled compression path.
+    }
+
+    const rasterized = await rasterizePdf(file, quality, onPageProgress);
+    candidates.push({ blob: rasterized, mode: 'rasterized' });
+    candidates.sort((a, b) => a.blob.size - b.blob.size);
+    return candidates[0];
+  }
+
+  function makeUniqueName(name, usedNames) {
+    if (!usedNames.has(name)) {
+      usedNames.add(name);
+      return name;
+    }
+    const dot = name.lastIndexOf('.');
+    const base = dot > 0 ? name.slice(0, dot) : name;
+    const extension = dot > 0 ? name.slice(dot) : '';
+    let suffix = 2;
+    let candidate = `${base} (${suffix})${extension}`;
+    while (usedNames.has(candidate)) candidate = `${base} (${++suffix})${extension}`;
+    usedNames.add(candidate);
+    return candidate;
+  }
+
+  function download(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   async function doCompress() {
-    if (!files.length) return;
-    const btn = document.getElementById('compress-btn');
-    if (btn) btn.disabled = true;
+    if (!files.length || isCompressing) return;
+    const button = document.getElementById('compress-btn');
+    const qualityInput = document.getElementById('compress-quality');
+    const qualityPercent = Math.max(10, Math.min(90, Number(qualityInput && qualityInput.value) || 60));
+    const quality = qualityPercent / 100;
+    isCompressing = true;
+    render();
     setProgress(5);
-    setStatus('กำลังโหลด...');
+    setStatus(`กำลังเตรียมบีบอัดที่คุณภาพ ${qualityPercent}%...`);
+
+    let successCount = 0;
+    let failureCount = 0;
+    const outputs = [];
+    const usedNames = new Set();
 
     try {
-      const quality = parseFloat(document.getElementById('compress-quality').value) / 100;
-      let ok = 0, fail = 0;
-      const blobs = [];
+      for (let index = 0; index < files.length; index++) {
+        const item = files[index];
+        const pdf = isPdf(item.file);
+        const baseName = item.file.name.replace(/\.[^.]+$/, '') || item.file.name;
+        item.status = 'pending';
+        item.resultSize = undefined;
+        item.detail = '';
+        setStatus(`กำลังบีบอัด ${item.file.name} (${index + 1}/${files.length})...`);
+        setProgress(Math.round(5 + (index / files.length) * 88));
 
-      for (let i = 0; i < files.length; i++) {
-        const item = files[i];
-        const isImg = item.file.type.startsWith('image/');
-        setStatus(`กำลังบีบอัด ${item.file.name} (${i + 1}/${files.length})...`);
-        setProgress(Math.round((i / files.length) * 90) + 5);
-        
         try {
-          let finalBlob = null;
-          let ext = isImg ? '_compressed.jpg' : '_compressed.pdf';
-
-          if (isImg) {
-            finalBlob = await compressImage(item.file, quality);
-          } else {
-            const buf = await item.file.arrayBuffer();
-            const pdfDoc = await PDFLib.PDFDocument.load(buf, { ignoreEncryption: true });
-            const compressed = await pdfDoc.save({
-              useObjectStreams: true,
-              addDefaultPage: false,
-              objectsPerTick: 50,
+          let result;
+          if (pdf) {
+            result = await compressPdf(item.file, quality, (page, total) => {
+              const progress = 5 + ((index + page / total) / files.length) * 88;
+              setProgress(Math.round(progress));
+              setStatus(`กำลังบีบอัด PDF ${item.file.name} · หน้า ${page}/${total} · คุณภาพ ${qualityPercent}%`);
             });
-            finalBlob = new Blob([compressed], { type: 'application/pdf' });
+          } else {
+            result = await compressImage(item.file, quality);
           }
 
-          const dotIdx = item.file.name.lastIndexOf('.');
-          const baseName = dotIdx !== -1 ? item.file.name.substring(0, dotIdx) : item.file.name;
-          const outName = baseName + ext;
-
-          blobs.push({ name: outName, blob: finalBlob });
-          item.status = 'success';
-          ok++;
-        } catch (err) {
-          console.error(err);
+          const extension = pdf ? 'pdf' : result.extension;
+          const outputName = makeUniqueName(`${baseName}_compressed.${extension}`, usedNames);
+          const savedPercent = Math.max(0, Math.round((1 - result.blob.size / item.file.size) * 100));
+          item.resultSize = result.blob.size;
+          item.savedPercent = savedPercent;
+          item.status = result.blob.size < item.file.size ? 'success' : 'unchanged';
+          if (pdf && result.mode === 'rasterized') {
+            item.detail = 'หน้า PDF ถูกแปลงเป็นภาพ';
+          } else if (pdf && result.mode === 'optimized') {
+            item.detail = 'ปรับโครงสร้างโดยคงข้อความไว้';
+          } else if (result.mode === 'original') {
+            item.detail = 'ไฟล์เดิมเล็กกว่าไฟล์ที่แปลงได้';
+          }
+          outputs.push({ name: outputName, blob: result.blob, originalSize: item.file.size });
+          successCount++;
+        } catch (error) {
+          console.error(error);
           item.status = 'error';
-          fail++;
+          item.detail = error.message || 'ไม่สามารถบีบอัดไฟล์นี้ได้';
+          failureCount++;
         }
         render();
       }
 
-      setProgress(95);
-
-      if (ok === 1) {
-        const { name, blob } = blobs[0];
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = name;
-        a.click();
-        URL.revokeObjectURL(a.href);
-      } else if (ok > 1) {
-        setStatus('กำลังรวมไฟล์เป็น ZIP...');
-        if (!window.JSZip) {
-            throw new Error('JSZip library not loaded. Please make sure it is included in index.html');
-        }
+      if (outputs.length === 1) {
+        download(outputs[0].blob, outputs[0].name);
+      } else if (outputs.length > 1) {
+        if (!window.JSZip) throw new Error('โหลดเครื่องมือ ZIP ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+        setStatus('กำลังรวมไฟล์ที่บีบอัดเป็น ZIP...');
         const zip = new JSZip();
-        blobs.forEach(b => zip.file(b.name, b.blob));
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(zipBlob);
-        a.download = 'compressed_files.zip';
-        a.click();
-        URL.revokeObjectURL(a.href);
+        outputs.forEach(output => zip.file(output.name, output.blob));
+        download(await zip.generateAsync({ type: 'blob' }), 'compressed_files.zip');
       }
 
+      const originalTotal = outputs.reduce((sum, output) => sum + output.originalSize, 0);
+      const compressedTotal = outputs.reduce((sum, output) => sum + output.blob.size, 0);
+      const totalSaved = originalTotal
+        ? Math.max(0, Math.round((1 - compressedTotal / originalTotal) * 100))
+        : 0;
       setProgress(100);
-      setStatus(`✓ บีบอัดสำเร็จ ${ok} ไฟล์` + (fail ? ` · ✗ ล้มเหลว ${fail} ไฟล์` : ''));
-    } catch (e) {
-      setStatus('เกิดข้อผิดพลาด: ' + e.message, true);
+      setStatus(`เสร็จแล้ว ${successCount} ไฟล์ · ลดขนาดรวม ${totalSaved}%` + (failureCount ? ` · ล้มเหลว ${failureCount} ไฟล์` : ''));
+    } catch (error) {
+      setStatus('เกิดข้อผิดพลาด: ' + error.message, true);
+    } finally {
+      isCompressing = false;
+      render();
+      if (button) button.disabled = files.length === 0;
     }
-    if (btn) btn.disabled = false;
   }
 
   function renderPage() {
@@ -198,53 +370,52 @@ const CompressPdf = (() => {
           <input type="file" id="compress-input" accept=".pdf,image/*" multiple style="display:none"/>
         </div>
 
-        <div style="max-width:600px;margin-bottom:16px;display:none" id="compress-options">
-          <div style="display:flex;align-items:center;gap:16px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)">
-            <span style="font-size:13px;color:var(--text-2);flex:1">ระดับการบีบอัด (คุณภาพ)</span>
+        <div class="compress-options" id="compress-options" style="display:none">
+          <div class="compress-quality-row">
+            <label for="compress-quality">ระดับคุณภาพ</label>
             <input type="range" id="compress-quality" min="10" max="90" value="60"
-              oninput="document.getElementById('compress-quality-val').textContent=this.value+'%'"
-              style="flex:1;accent-color:var(--gold)"/>
-            <span id="compress-quality-val" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);min-width:36px;text-align:right">60%</span>
+              oninput="document.getElementById('compress-quality-val').textContent=this.value+'%'" />
+            <span id="compress-quality-val">60%</span>
           </div>
+          <p class="compress-note">PDF จะสร้างหน้าใหม่เป็นภาพตามคุณภาพที่เลือก ทำให้เลือกหรือค้นหาข้อความไม่ได้ หากไฟล์เดิมเล็กกว่า ระบบจะเก็บไฟล์เดิมไว้ รูปภาพจะถูกแปลงเป็น JPG และพื้นหลังโปร่งใสจะเป็นสีขาว</p>
         </div>
 
-        <div id="compress-section" style="display:none;max-width:600px">
+        <div id="compress-section" class="compress-section" style="display:none">
           <div class="list-toolbar">
             <span class="list-stat" id="compress-stat">0 ไฟล์</span>
-            <button class="action-btn action-btn--danger" onclick="CompressPdf.clearAll()">ล้างทั้งหมด</button>
+            <button class="action-btn action-btn--danger" id="compress-clear-btn" type="button" onclick="CompressPdf.clearAll()">ล้างทั้งหมด</button>
           </div>
           <div class="file-list" id="compress-list"></div>
           <div class="print-bar">
             <span class="selected-summary">เลือกไฟล์แล้วกด Compress</span>
             <button class="btn btn--primary" id="compress-btn" disabled onclick="CompressPdf.doCompress()">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M8 2v12M5 5l3-3 3 3M5 11l3 3 3-3"/>
-              </svg>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v12M5 5l3-3 3 3M5 11l3 3 3-3"/></svg>
               Compress & Download
             </button>
           </div>
-          <div class="progress-track" id="compress-track" style="max-width:600px">
-            <div class="progress-fill" id="compress-fill"></div>
-          </div>
-          <div class="status-text" id="compress-status"></div>
+          <div class="progress-track" id="compress-track"><div class="progress-fill" id="compress-fill"></div></div>
+          <div class="status-text" id="compress-status" aria-live="polite"></div>
         </div>
       </div>
     `;
 
-    const dz = document.getElementById('compress-drop-zone');
-    const fi = document.getElementById('compress-input');
-
-    fi.addEventListener('change', e => {
-      addFiles(e.target.files);
-      e.target.value = '';
+    const dropZone = document.getElementById('compress-drop-zone');
+    const fileInput = document.getElementById('compress-input');
+    fileInput.addEventListener('change', event => {
+      addFiles(event.target.files);
+      event.target.value = '';
     });
-
-    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
-    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-    dz.addEventListener('drop', e => {
-      e.preventDefault(); dz.classList.remove('drag-over');
-      addFiles(e.dataTransfer.files);
+    dropZone.addEventListener('dragover', event => {
+      event.preventDefault();
+      dropZone.classList.add('drag-over');
     });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', event => {
+      event.preventDefault();
+      dropZone.classList.remove('drag-over');
+      addFiles(event.dataTransfer.files);
+    });
+    render();
   }
 
   return { renderPage, removeFile, clearAll, doCompress };

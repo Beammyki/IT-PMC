@@ -466,6 +466,20 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .drop-sub strong { color: var(--primary); }
 input[type="file"] { display: none; }
 .file-section { width: 100%; max-width: 920px; margin-top: 18px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: #fff; box-shadow: 0 2px 12px rgba(16,24,40,.03); }
+.compress-options, .compress-section { width: 100%; max-width: 600px; }
+.compress-options { margin-bottom: 16px; }
+.compress-quality-row { display: flex; align-items: center; padding: 14px 16px; gap: 16px; border: 1px solid var(--border); border-radius: var(--r); background: var(--surface); }
+.compress-quality-row label { flex: 1; color: var(--text-2); font-size: 13px; }
+.compress-quality-row input[type="range"] { min-width: 90px; flex: 1; accent-color: var(--primary); }
+.compress-quality-row output, #compress-quality-val { min-width: 40px; color: var(--primary); font-family: 'DM Mono', monospace; font-size: 12px; text-align: right; }
+.compress-note { margin: 8px 2px 0; color: var(--text-3); font-size: 10px; line-height: 1.6; }
+.compress-file-item .file-name { flex: 1; }
+.compress-file-detail { display: block; margin-top: 3px; color: var(--text-3); font-size: 9px; font-weight: 400; white-space: normal; }
+.compress-result-badge { flex: 0 0 auto; color: var(--green); font-size: 9px; font-weight: 700; }
+.compress-result-badge--same { color: var(--text-3); }
+.compress-result-badge--error { color: var(--red); }
+.compress-file-item .file-remove:disabled { opacity: .4; cursor: not-allowed; }
+.drop-zone.is-disabled { pointer-events: none; opacity: .62; }
 .list-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 12px; }
 .list-stat, .selected-summary { color: var(--text-3); font-size: 11px; }
 .list-stat strong, .selected-summary strong { color: var(--primary); }
