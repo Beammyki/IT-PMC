@@ -108,6 +108,13 @@ const CompressPdf = (() => {
     el.className = 'status-text' + (isError ? ' error' : '');
   }
 
+  function setUploadStatus(message) {
+    const el = document.getElementById('compress-upload-status');
+    if (!el) return;
+    el.textContent = message;
+    el.hidden = !message;
+  }
+
   function setProgress(percent) {
     const track = document.getElementById('compress-track');
     const fill = document.getElementById('compress-fill');
@@ -119,9 +126,11 @@ const CompressPdf = (() => {
   function addFiles(newFiles) {
     if (isCompressing) return;
     let changed = false;
-    for (const file of newFiles) {
+    for (const file of Array.from(newFiles || [])) {
       if (!isPdf(file) && !isImage(file)) continue;
-      if (!files.some(item => item.file.name === file.name && item.file.size === file.size)) {
+      // File names and sizes are not unique: a newly dropped file may have
+      // changed contents while keeping both. Only reject the exact same File.
+      if (!files.some(item => item.file === file)) {
         files.push({ file, status: 'pending' });
         changed = true;
       }
@@ -129,6 +138,7 @@ const CompressPdf = (() => {
     if (changed) {
       clearPreparedResult();
       setStatus('');
+      setUploadStatus('');
     }
     render();
   }
@@ -145,8 +155,14 @@ const CompressPdf = (() => {
     if (isCompressing) return;
     clearPreparedResult();
     files.length = 0;
+    const fileInput = document.getElementById('compress-input');
+    if (fileInput) fileInput.value = '';
+    const dropZone = document.getElementById('compress-drop-zone');
+    if (dropZone) dropZone.classList.remove('drag-over');
+    setProgress(-1);
     render();
     setStatus('');
+    setUploadStatus('รายการถูกล้างแล้ว ลากไฟล์ชุดใหม่มาวางได้เลย');
   }
 
   function updateQuality(value) {
@@ -518,6 +534,7 @@ const CompressPdf = (() => {
           <p class="drop-sub">รองรับไฟล์หลายไฟล์พร้อมกัน (.pdf, .jpg, .png)<br/><strong>คลิกเพื่อเปิด File Browser</strong></p>
           <input type="file" id="compress-input" accept=".pdf,image/*" multiple style="display:none"/>
         </div>
+        <div class="status-text compress-upload-status" id="compress-upload-status" aria-live="polite" hidden></div>
 
         <div class="compress-options" id="compress-options" style="display:none">
           <div class="compress-quality-row">
@@ -557,13 +574,14 @@ const CompressPdf = (() => {
     });
     dropZone.addEventListener('dragover', event => {
       event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
       dropZone.classList.add('drag-over');
     });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
     dropZone.addEventListener('drop', event => {
       event.preventDefault();
       dropZone.classList.remove('drag-over');
-      addFiles(event.dataTransfer.files);
+      addFiles(event.dataTransfer?.files);
     });
     render();
   }
