@@ -45,7 +45,7 @@ const MergePdf = (() => {
   function updateStat() {
     const stat = document.getElementById('merge-stat');
     if (!stat) return;
-    stat.innerHTML = `<strong>${sources.size}</strong> ไฟล์ · <strong>${pages.length}</strong> หน้า — ลากเพื่อจัดลำดับหน้า`;
+    stat.innerHTML = `<strong>${sources.size}</strong> ไฟล์ · <strong>${pages.length}</strong> หน้า — ลากเพื่อจัดลำดับหรือหมุนทีละหน้า`;
   }
 
   function render() {
@@ -68,6 +68,8 @@ const MergePdf = (() => {
       item.id = `merge-page-${page.id}`;
       item.dataset.pageId = page.id;
       item.draggable = !isLoading && !isMerging;
+      item.style.setProperty('--merge-page-rotation', `${page.rotation}deg`);
+      item.classList.toggle('is-rotated-sideways', page.rotation % 180 !== 0);
       item.setAttribute('aria-label', `หน้า ${index + 1} จาก ${page.file.name}`);
       item.innerHTML = `
         <button class="merge-page-preview" type="button" data-action="preview" aria-label="เปิดดูหน้า ${index + 1} ขนาดใหญ่">
@@ -81,6 +83,7 @@ const MergePdf = (() => {
         <div class="merge-page-actions">
           <button class="action-btn" type="button" data-action="up" aria-label="เลื่อนหน้า ${index + 1} ขึ้น" ${index === 0 || isLoading || isMerging ? 'disabled' : ''}>↑</button>
           <button class="action-btn" type="button" data-action="down" aria-label="เลื่อนหน้า ${index + 1} ลง" ${index === pages.length - 1 || isLoading || isMerging ? 'disabled' : ''}>↓</button>
+          <button class="action-btn merge-page-rotate" type="button" data-action="rotate" title="หมุนตามเข็มนาฬิกา 90°" aria-label="หมุนหน้า ${index + 1} ตามเข็มนาฬิกา 90 องศา" ${isLoading || isMerging ? 'disabled' : ''}>↻</button>
           <button class="action-btn action-btn--danger" type="button" data-action="remove" aria-label="ลบหน้า ${index + 1}" ${isLoading || isMerging ? 'disabled' : ''}>ลบหน้า</button>
         </div>
       `;
@@ -94,6 +97,7 @@ const MergePdf = (() => {
 
       item.querySelector('[data-action="up"]').addEventListener('click', () => moveUp(index));
       item.querySelector('[data-action="down"]').addEventListener('click', () => moveDown(index));
+      item.querySelector('[data-action="rotate"]').addEventListener('click', () => rotatePage(index));
       item.querySelector('[data-action="remove"]').addEventListener('click', () => removePage(index));
       item.querySelector('[data-action="preview"]').addEventListener('click', () => openPreview(page.id));
       item.addEventListener('dragstart', handleDragStart);
@@ -116,6 +120,14 @@ const MergePdf = (() => {
     if (isLoading || isMerging || index < 0 || index >= pages.length - 1) return;
     [pages[index], pages[index + 1]] = [pages[index + 1], pages[index]];
     render();
+  }
+
+  function rotatePage(index) {
+    if (isLoading || isMerging || index < 0 || index >= pages.length) return;
+    const page = pages[index];
+    page.rotation = (page.rotation + 90) % 360;
+    render();
+    setStatus(`หมุนหน้า ${index + 1} แล้ว ${page.rotation}°`);
   }
 
   function releaseSourceIfUnused(sourceId) {
@@ -178,7 +190,7 @@ const MergePdf = (() => {
   }
 
   function createPage(file, sourceId, kind, pageIndex, thumbnail = null) {
-    return { id: String(++nextId), file, sourceId, kind, pageIndex, thumbnail };
+    return { id: String(++nextId), file, sourceId, kind, pageIndex, thumbnail, rotation: 0 };
   }
 
   async function openPreview(pageId) {
@@ -196,6 +208,7 @@ const MergePdf = (() => {
       : page.file.name;
     image.hidden = true;
     image.removeAttribute('src');
+    image.style.transform = '';
     loadingMessage.textContent = page.kind === 'pdf' ? 'กำลังโหลดภาพความละเอียดสูง...' : '';
     loadingMessage.hidden = page.kind !== 'pdf';
     if (!dialog.open) dialog.showModal();
@@ -203,6 +216,7 @@ const MergePdf = (() => {
     if (page.kind !== 'pdf') {
       image.src = page.thumbnail;
       image.alt = `ตัวอย่างหน้า ${pageIndex + 1} จาก ${page.file.name}`;
+      image.style.transform = `rotate(${page.rotation}deg)`;
       image.hidden = false;
       return;
     }
@@ -224,7 +238,10 @@ const MergePdf = (() => {
         (window.innerWidth - 56) / baseViewport.width,
         (window.innerHeight - 168) / baseViewport.height
       );
-      const viewport = pdfPage.getViewport({ scale: Math.max(0.4, scale) });
+      const viewport = pdfPage.getViewport({
+        scale: Math.max(0.4, scale),
+        rotation: (pdfPage.rotate + page.rotation) % 360,
+      });
       canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       canvas.width = Math.ceil(viewport.width);
@@ -233,6 +250,7 @@ const MergePdf = (() => {
       if (dialog.open && requestId === previewRequest) {
         image.src = canvas.toDataURL('image/jpeg', 0.92);
         image.alt = `ตัวอย่างหน้า ${pageIndex + 1} จาก ${page.file.name}`;
+        image.style.transform = '';
         image.hidden = false;
         loadingMessage.hidden = true;
       }
@@ -406,6 +424,9 @@ const MergePdf = (() => {
             pdfCache.set(item.sourceId, sourcePdf);
           }
           const [page] = await merged.copyPages(sourcePdf, [item.pageIndex]);
+          if (item.rotation) {
+            page.setRotation(PDFLib.degrees((page.getRotation().angle + item.rotation) % 360));
+          }
           merged.addPage(page);
         } else {
           let image = imageCache.get(item.sourceId);
@@ -414,8 +435,20 @@ const MergePdf = (() => {
             image = item.kind === 'jpg' ? await merged.embedJpg(bytes) : await merged.embedPng(bytes);
             imageCache.set(item.sourceId, image);
           }
-          const page = merged.addPage([image.width, image.height]);
-          page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+          const sideways = item.rotation % 180 !== 0;
+          const page = merged.addPage(sideways ? [image.height, image.width] : [image.width, image.height]);
+          const drawPosition = {
+            0: { x: 0, y: 0 },
+            90: { x: image.height, y: 0 },
+            180: { x: image.width, y: image.height },
+            270: { x: 0, y: image.width },
+          }[item.rotation];
+          page.drawImage(image, {
+            ...drawPosition,
+            width: image.width,
+            height: image.height,
+            rotate: PDFLib.degrees(item.rotation),
+          });
         }
         setProgress(Math.round(((i + 1) / orderedPages.length) * 88));
       }
@@ -459,7 +492,7 @@ const MergePdf = (() => {
         <div class="page-header">
           <span class="page-eyebrow">Tool 02</span>
           <h1 class="page-title">Merge <em>PDF & Images</em></h1>
-          <p class="page-desc">รวมไฟล์ PDF และรูปภาพ แล้วลากจัดลำดับหรือลบทีละหน้าก่อนดาวน์โหลด</p>
+          <p class="page-desc">รวมไฟล์ PDF และรูปภาพ แล้วลากจัดลำดับ หมุน หรือลบทีละหน้าก่อนดาวน์โหลด</p>
         </div>
 
         <div class="drop-zone" id="merge-drop-zone" onclick="document.getElementById('merge-input').click()">
@@ -480,7 +513,7 @@ const MergePdf = (() => {
           </div>
           <div class="merge-page-grid" id="merge-page-grid"></div>
           <div class="print-bar">
-            <span class="selected-summary">ลากหน้าเพื่อจัดลำดับ หรือใช้ปุ่ม ↑↓ แล้วกด Merge</span>
+            <span class="selected-summary">ลากหน้าเพื่อจัดลำดับ ใช้ปุ่ม ↑↓ หรือ ↻ เพื่อหมุน แล้วกด Merge</span>
             <button class="btn btn--primary" id="merge-btn" type="button" disabled>
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 4h10M3 8h7M3 12h4"/></svg>
               Merge & Download
@@ -536,6 +569,7 @@ const MergePdf = (() => {
       const image = document.getElementById('merge-preview-image');
       if (image) {
         image.removeAttribute('src');
+        image.style.transform = '';
         image.hidden = true;
       }
     });
@@ -543,5 +577,5 @@ const MergePdf = (() => {
     if (statusMessage) setStatus(statusMessage);
   }
 
-  return { renderPage, addFiles, removePage, moveUp, moveDown, doMerge, clearAll };
+  return { renderPage, addFiles, removePage, moveUp, moveDown, rotatePage, doMerge, clearAll };
 })();
